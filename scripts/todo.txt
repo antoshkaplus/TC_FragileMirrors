@@ -1,0 +1,5 @@
+
+1) better heuristic
+2) better algorithm (variable width)
+3) using sse3
+4) better timing for every guy
