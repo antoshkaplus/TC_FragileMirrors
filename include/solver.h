@@ -14,8 +14,13 @@
 #include <cmath>
 #include <cstdlib>
 
+<<<<<<< HEAD
 #include "ant/core.h"
 #include <ant/optimization.h>
+=======
+#include <ant>
+
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 
 #include "board.h"
 
@@ -33,7 +38,11 @@ struct NaiveSolver : Solver {
         while (true) {
             bool again = false;
             for (auto i = 0; i < board.size(); ++i) {
+<<<<<<< HEAD
                 if (sb.rowMirrorsLeft(i) > 0) {
+=======
+                if (sb.mirrors_left_[sb.kHor][i] > 0) {
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
                     sb.cast({i, -1});
                     int_moves.push_back(i);
                     int_moves.push_back(-1);
@@ -53,7 +62,10 @@ struct BeamSearchSolver : Solver, opt::BeamSearch {
     // simple double 
     struct Value : BS::Value {
         Value(double val) : val(val) {}
+<<<<<<< HEAD
         
+=======
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         bool operator<(const BS::Value& v) const override {
             return val < static_cast<const Value&>(v).val;
         }
@@ -78,6 +90,7 @@ struct BeamSearchSolver : Solver, opt::BeamSearch {
         virtual vector<unique_ptr<BS::Component>> candidateComponents() {
             vector<unique_ptr<BS::Component>> ccs;            
             for (auto i = 0; i < board_.size(); ++i) {
+<<<<<<< HEAD
                 if (board_.rowMirrorsLeft(i) > 0) {
                     ccs.emplace_back(new Component(i, -1));
                     ccs.emplace_back(new Component(i, (Int)board_.size()));
@@ -85,6 +98,15 @@ struct BeamSearchSolver : Solver, opt::BeamSearch {
                 if (board_.colMirrorsLeft(i) > 0) {
                     ccs.emplace_back(new Component(-1, i));
                     ccs.emplace_back(new Component((Int)board_.size(), i));
+=======
+                if (board_.mirrors_left_[board_.kHor][i] > 0) {
+                    ccs.emplace_back(new Component(i, -1));
+                    ccs.emplace_back(new Component(i, board_.size()));
+                }
+                if (board_.mirrors_left_[board_.kVer][i] > 0) {
+                    ccs.emplace_back(new Component(-1, i));
+                    ccs.emplace_back(new Component(board_.size(), i));
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
                 }
             }
             return ccs;
@@ -167,7 +189,11 @@ struct BeamSearchSolver : Solver, opt::BeamSearch {
     vector<int> destroy(vector<string>& board) override {
         Board sb(board);
         BeamSearchSolver bss;
+<<<<<<< HEAD
         Count count = board.size() < 75 ? 1000 : 500;  
+=======
+        Count count = board.size() < 75 ? 150 : 85;  
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         //Count count = 1000;
         auto ptr = bss.solve(CurrentState(sb), count);
         return static_cast<CurrentState&>(*ptr).int_casts_;

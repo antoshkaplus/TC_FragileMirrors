@@ -7,11 +7,16 @@
 //
 
 #include <iostream>
+<<<<<<< HEAD
 #include <random>
+=======
+
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 
 #include "board.h"
 #include "FragileMirrors.h"
 
+<<<<<<< HEAD
 
 
 vector<string> generateStringBoard(int sz) {
@@ -83,5 +88,23 @@ int main(int argc, const char * argv[])
         return 0;
     }
     return 0;
+=======
+int main(int argc, const char * argv[])
+{
+  int n;
+  cin >> n;
+  vector<string> strBoard(n);
+  for (int i = 0; i < n; i++) {
+    cin >> strBoard[i];
+  }
+  FragileMirrors fg;
+  vector<int> r = fg.destroy(strBoard);
+  n = (int)r.size();
+  cout << n << endl;
+  for (int i = 0; i < n; i++) {
+    cout << r[i] << endl;
+  }
+  return 0;
+>>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 }
 
