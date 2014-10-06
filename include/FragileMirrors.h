@@ -15,10 +15,6 @@
 #include <fstream>
 #include <ctime>
 
-<<<<<<< HEAD
-=======
-#include "GridBoard.h"
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 #include "solver.h"
 #include "chokudai.h"
 #include "eldidou.h"
@@ -29,18 +25,9 @@ using namespace std;
 class FragileMirrors : Solver {
 public:
   vector<int> destroy(vector<string>& board) override {
-<<<<<<< HEAD
       //Chokudai ns;
       BeamSearchSolver ns;
       //IterativeSolver ns;
-=======
-      
-      
-      //Chokudai ns;
-      BeamSearchSolver ns;
-      //IterativeSolver ns;
-      
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
       return ns.destroy(board);
   }
 };

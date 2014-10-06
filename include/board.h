@@ -12,17 +12,11 @@
 #include <iostream>
 #include <vector>
 #include <stack>
-<<<<<<< HEAD
 
 #include <ant/core.h>
 #include <ant/grid.h>
 
 using namespace ant::grid;
-=======
-#include <ant>
-
-using namespace ant::d2::grid;
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 using namespace ant;
 using namespace std;
 
@@ -38,11 +32,7 @@ struct BoardBase {
     virtual void cast(const Position& p) = 0;
     virtual void restore() = 0;
     Count mirrorsLeft() const {
-<<<<<<< HEAD
         return (Count)(size()*size() - mirrorsDestroyed());
-=======
-        return size()*size() - mirrorsDestroyed();
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
     }
     virtual double filling() { return mirrorsLeft()/(double)(size()*size()); }
     virtual Count mirrorsDestroyed() const = 0;
@@ -83,11 +73,8 @@ struct BoardBase {
 ostream& operator<<(ostream& output, const BoardBase& board);
 
 
-<<<<<<< HEAD
 
 
-=======
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 struct Board : BoardBase {
     const static Index kHor = 0;
     const static Index kVer = 1;
@@ -145,7 +132,6 @@ struct Board : BoardBase {
     };
     
     Board(const vector<string>& board) {
-<<<<<<< HEAD
         board_size_ = (Int)board.size()+2;
         destroyed_count_ = 0;
         mirrors_left_[kHor].resize((Count)board.size(), (Count)board.size());
@@ -163,23 +149,6 @@ struct Board : BoardBase {
         destroyed_items_.fill(false);
         //hashed_items_.resize((Count)board_size_, (Count)board_size_);
         //hashed_items_.fill(0);
-=======
-        board_size_ = board.size()+2;
-        destroyed_count_ = 0;
-        mirrors_left_[kHor].resize(board.size(), board.size());
-        mirrors_left_[kVer].resize(board.size(), board.size());
-        empty_row_count_ = 0;
-        empty_col_count_ = 0;
-        
-        Position ns[4];
-        default_random_engine rng;
-        uniform_int_distribution<Index> distr(0, numeric_limits<Index>::max()/(size()*size()));
-        items_.resize(board.size()+2, board.size()+2);
-        destroyed_items_.resize(board_size_, board_size_);
-        destroyed_items_.fill(false);
-        hashed_items_.resize(board_size_, board_size_);
-        hashed_items_.fill(0);
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         for (auto row = 1; row <= board.size(); ++row) {
             for (auto col = 1; col <= board.size(); ++col) {
                 ns[kDirTop]     = {row-1, col};
@@ -188,18 +157,13 @@ struct Board : BoardBase {
                 ns[kDirRight]   = {row, col+1};
                 memcpy(items_(row,col).neighbors, ns, sizeof(Position[4]));
                 items_(row,col).mirror = board[row-1][col-1] == 'R'? kMirRight : kMirLeft;
-<<<<<<< HEAD
                 //hash += hashed_items_(row, col) = distr(rng);
                 hash_function_->xorNothing(&hash_); // xor out 
                 hash_function_->xorState(&hash_, Position{row, col}, 0);
-=======
-                hash += hashed_items_(row, col) = distr(rng);
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
             }
         }
         for (auto i = 0; i < board.size()+2; ++i) {
             items_(i, 0).mirror = kMirNothing;
-<<<<<<< HEAD
             items_(i, (Count)board.size()+1).mirror = kMirNothing;
             items_(0, i).mirror = kMirNothing;
             items_((Count)board.size()+1, i).mirror = kMirNothing;
@@ -208,16 +172,6 @@ struct Board : BoardBase {
             items_(i, (Count)board.size()+1).neighbors[kDirLeft] = {i, static_cast<Int>(board.size())};
             items_(0, i).neighbors[kDirBottom] = {1, i};
             items_((Count)board.size()+1, i).neighbors[kDirTop] = {static_cast<Int>(board.size()), i};
-=======
-            items_(i, board.size()+1).mirror = kMirNothing;
-            items_(0, i).mirror = kMirNothing;
-            items_(board.size()+1, i).mirror = kMirNothing;
-            
-            items_(i, 0).neighbors[kDirRight] = {i, 1};
-            items_(i, board.size()+1).neighbors[kDirLeft] = {i, static_cast<Int>(board.size())};
-            items_(0, i).neighbors[kDirBottom] = {1, i};
-            items_(board.size()+1, i).neighbors[kDirTop] = {static_cast<Int>(board.size()), i};
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         }
     }
     
@@ -253,11 +207,7 @@ struct Board : BoardBase {
         Position p(pp);
         p.shift(1, 1);
         char dir = castDirection(p);
-<<<<<<< HEAD
         //assert(!Rectangle(1, 1, size(), size()).hasInside(p));
-=======
-        assert(!Rectangle(1, 1, size(), size()).hasInside(p));
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         tie(p, dir) = items_(p).nextFrom(dir);
         destroyed_.push_back({});
         while (items_(p).mirror != kMirNothing) {
@@ -267,36 +217,9 @@ struct Board : BoardBase {
             tie(p, dir) = items_(p).nextFrom(kDirOpposite[dir]);
         }      
     }
-<<<<<<< HEAD
        
     Count tryCast(const Position& pp) {
         static ant::stack<Position> recover_stack;
-=======
-    
-    /*
-     everything should be a cast
-    
-     int res = 0;
-     forn(i, n) {
-     res += (cnt[i] == 1) + (cnt[n+i] == 1);
-     res += (cnt[i] == 3) + (cnt[n+i] == 3);
-     res += (cnt[i] == 5) + (cnt[n+i] == 5);
-     res -= ((cnt[i] == 0) + (cnt[n+i] == 0)) * 15;
-     }
-     res *= ALONE_COEFF;
-     forn(i, n) res += cnt[i];
-     int KC = 7;
-     forn(i, KC) res += cnt[n/2+KC/2-i] + cnt[n+n/2+KC/2-i];
-     return res;
-     
-     
-     const double ALONE_COEFF = 1.75;
-
-    */
-    
-    ant::stack<Position> recover_stack;
-    Count tryCast(const Position& pp) {
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         // stack is cleared.. by nature
         Position p(pp);
         p.shift(1, 1);
@@ -374,11 +297,7 @@ struct Board : BoardBase {
     
     //private:
     void destroy(const Position& p) {
-<<<<<<< HEAD
         //assert(Rectangle(1, 1, size(), size()).hasInside(p));
-=======
-        assert(Rectangle(1, 1, size(), size()).hasInside(p));
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         if (--mirrors_left_[kHor][p.row-1] == 0) ++empty_row_count_;
         if (--mirrors_left_[kVer][p.col-1] == 0) ++empty_col_count_;
         ++destroyed_count_;
@@ -388,7 +307,6 @@ struct Board : BoardBase {
         items_(item.neighbors[kDirLeft]).neighbors[kDirRight] = item.neighbors[kDirRight];
         items_(item.neighbors[kDirRight]).neighbors[kDirLeft] = item.neighbors[kDirLeft];
         destroyed_items_(p) = true;
-<<<<<<< HEAD
         //hash -= hashed_items_(p);
         hash_function_->xorState(&hash_, p, 0); // xor out
         hash_function_->xorNothing(&hash_); // xor in
@@ -396,13 +314,6 @@ struct Board : BoardBase {
     
     void restore(const Position& p) {
         //assert(Rectangle(1, 1, size(), size()).hasInside(p));
-=======
-        hash -= hashed_items_(p);
-    }
-    
-    void restore(const Position& p) {
-        assert(Rectangle(1, 1, size(), size()).hasInside(p));
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
         if (mirrors_left_[kHor][p.row-1]++ == 0) --empty_row_count_;
         if (mirrors_left_[kVer][p.col-1]++ == 0) --empty_col_count_;
         --destroyed_count_;
@@ -412,7 +323,6 @@ struct Board : BoardBase {
         items_(item.neighbors[kDirLeft]).neighbors[kDirRight] = p;
         items_(item.neighbors[kDirRight]).neighbors[kDirLeft] = p;
         destroyed_items_(p) = false;
-<<<<<<< HEAD
         //hash += hashed_items_(p);
         hash_function_->xorNothing(&hash_); // xor out
         hash_function_->xorState(&hash_, p, 0); // xor in
@@ -425,16 +335,6 @@ struct Board : BoardBase {
     
 private:
     //Index hash;
-=======
-        hash += hashed_items_(p);
-    }
-    
-    bool operator==(const Board& b) const {
-        return hash == b.hash;
-    }
-    
-    Index hash;
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
     Count destroyed_count_;
     vector<ant::stack<Position>> destroyed_; 
     vector<Count> mirrors_left_[2];
@@ -443,7 +343,6 @@ private:
     // here 0 and last indices will be placed for 
     // special elements that will keep next element 
     // to destroy or just opposite entry
-<<<<<<< HEAD
     //Grid<Index> hashed_items_;
     Grid<Item> items_;
     Grid<char> destroyed_items_;
@@ -452,12 +351,6 @@ private:
     constexpr static size_t HASH_BITS_COUNT = 64;
     shared_ptr<ZobristHashing<HASH_BITS_COUNT>> hash_function_;
     ZobristHashing<HASH_BITS_COUNT>::value hash_;
-=======
-    Grid<Index> hashed_items_;
-    Grid<Item> items_;
-    Grid<char> destroyed_items_;
-    size_t board_size_;
->>>>>>> f44c4f61d7d9b77a6c488bc54a6377b0f43f8250
 
 };
 
