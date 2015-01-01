@@ -10,7 +10,7 @@ for i in range(n):
 
 input.close()
 
-executable = "./../build-release/FragileMirrors"
+executable = "./../build-xcode/Release/FragileMirrors"
 import os
 os.system(executable + " -solve -i input.txt -o output.txt")
 

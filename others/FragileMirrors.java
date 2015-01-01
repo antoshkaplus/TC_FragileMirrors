@@ -2,29 +2,43 @@ import java.util.Arrays;
 
 public class FragileMirrors {
 	private int n, bestSolSize = 1000, stackIdx;
-	private int[] castSize = new int[1024];
-	private int[][] castStack = new int[1024][4096];
-	private int[] board, bestSol, currSol;
-	private long seed = 19720909;
+	// cast stack probably
+    private int[] castSize = new int[1024];
+	// ok, here a lot of casy stacks
+    private int[][] castStack = new int[1024][4096];
+	// ?
+    private int[] board, bestSol, currSol;
+	
+    private long seed = 19720909;
 	private final long multiplier = 0x5DEECE66DL, addend = 0xBL, mask = (1L << 48) - 1;
-	static int TIMEOUT = 9500, cycles;
+	
+    static int TIMEOUT = 9500, cycles;
 	private long timeout = System.currentTimeMillis() + TIMEOUT;
-	private int[] minRemain = new int[1024], colCount = new int[1024], rowCount = new int[1024];
-
+	
+    private int[] minRemain = new int[1024]; 
+    private int[] colCount = new int[1024]; 
+    private int[] rowCount = new int[1024];
+    
 	public int[] destroy(String[] sboard) {
-		Arrays.fill(minRemain, 10001);
+		// ??
+        Arrays.fill(minRemain, 10001);
 		parse(sboard);
 		cycles = 0;
+        // for each row and col we have n elements
 		Arrays.fill(rowCount, n);
 		Arrays.fill(colCount, n);
 		buildSol(n * n, 0);
 		while (System.currentTimeMillis() < timeout) {
 			int off = (random(bestSolSize) * (bestSolSize - 1 - (int) (timeout - System.currentTimeMillis()) * bestSolSize / TIMEOUT) / bestSolSize) / 2;
 			int remain = n * n;
+            
+            // we initialize board again
 			System.arraycopy(bestSol, 0, currSol, 0, off * 2);
 			Arrays.fill(rowCount, n);
 			Arrays.fill(colCount, n);
-			for (int i = 0; i < off; i++) {
+			// going inside to some kind of offset 
+            for (int i = 0; i < off; i++) {
+                // last one probably should be taken form some kind of ass
 				remain -= doCast(bestSol[i * 2 + 1], bestSol[i * 2]);
 				minRemain[i] = Math.min(minRemain[i], remain);
 			}
@@ -49,18 +63,24 @@ public class FragileMirrors {
 		}
 	}
 
+    // start n*n and 0
+    // off - probably some kind of offset
+    // premain - ??? this one i don't know
 	private void buildSol(int premain, int off) {
 		int currSolSize = off * 2;
 		int remain = premain;
 		boolean[][] empty = new boolean[4][n];
 		int[] cand = new int[5];
 		int[] val = new int[cand.length];
+        // remain - how many left, currSolSize - cast count ?
 		NEXT: while (remain > 0 && currSolSize < bestSolSize) {
 			int px = -1;
 			int py = -1;
+            // try to always kill one 
 			for (int i = 0; i < n; i++) {
 				int idx = i * n;
 				for (int j = 0; j < n; j++) {
+                    // this one is strange
 					if ((board[idx++] & 2) == 0) {
 						if (colCount[j] == 1 && rowCount[i] == 1) {
 							remain -= doCast(-1, i);
@@ -90,6 +110,7 @@ public class FragileMirrors {
 				}
 			}
 			int max = -1;
+            // first we cast for each candidate 
 			for (int i = 0; i < cand.length; i++) {
 				int curr = val[i];
 				if (curr < 0) continue;
@@ -103,6 +124,7 @@ public class FragileMirrors {
 				int next1 = 0;
 				int next2 = 0;
 				boolean[] es = empty[si];
+                // then we go in recursion
 				for (int pos = 0; pos < n; pos++) {
 					if (es[pos]) continue;
 					int c = tryCast(si == 0 ? -1 : si == 1 ? n : pos, si == 2 ? -1 : si == 3 ? n : pos);
@@ -122,6 +144,7 @@ public class FragileMirrors {
 					py = yi;
 				}
 			}
+            // now we do best cast possible
 			remain -= doCast(px, py);
 			if (remain << 2 > minRemain[currSolSize >> 1] * 5) break;
 			if (remain < minRemain[currSolSize >> 1]) minRemain[currSolSize >> 1] = remain;
@@ -222,7 +245,8 @@ public class FragileMirrors {
 
 	private void parse(String[] sboard) {
 		n = sboard.length;
-		board = new int[n * n];
+		// initializing board and currSol ? array
+        board = new int[n * n];
 		currSol = new int[2 * n * n];
 		int pos = 0;
 		for (int i = 0; i < n; i++) {

@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Anton Logunov. All rights reserved.
 //
 
-#include "eldidou.h"
+#include "eldidou.hpp"
 
 
 #ifdef __amd64

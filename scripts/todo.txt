@@ -3,3 +3,7 @@
 2) better algorithm (variable width)
 3) using sse3
 4) better timing for every guy
+
+1) better heuristic
+2) beam search the way to go
+3) need eventually to get beam search that is more or less similar to best first search

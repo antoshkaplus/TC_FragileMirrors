@@ -7,7 +7,7 @@
 //
 
 
-#include "chokudai.h"
+#include "chokudai.hpp"
 #include <cmath>
 #include <algorithm>
 #include <cstdio>

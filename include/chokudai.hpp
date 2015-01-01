@@ -11,7 +11,7 @@
 
 #include <iostream>
 
-#include "solver.h"
+#include "solver.hpp"
 
 
 #define NMAX 128

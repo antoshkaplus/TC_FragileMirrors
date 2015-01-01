@@ -15,21 +15,21 @@
 #include <fstream>
 #include <ctime>
 
-#include "solver.h"
-#include "chokudai.h"
-#include "eldidou.h"
+#include "solver.hpp"
+#include "chokudai.hpp"
+#include "eldidou.hpp"
 
 using namespace std;
 
 
-class FragileMirrors : Solver {
-public:
-  vector<int> destroy(vector<string>& board) override {
-      //Chokudai ns;
-      BeamSearchSolver ns;
-      //IterativeSolver ns;
-      return ns.destroy(board);
-  }
-};
+//class FragileMirrors : Solver {
+//public:
+//  vector<int> destroy(vector<string>& board) override {
+//      //Chokudai ns;
+//      BeamSearchSolver ns;
+//      //IterativeSolver ns;
+//      return ns.destroy(board);
+//  }
+//};
 
 #endif
