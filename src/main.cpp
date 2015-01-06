@@ -9,6 +9,9 @@
 #include <iostream>
 #include <random>
 
+#include "ant/optimization.h"
+
+
 #include "beam_search.hpp"
 #include "board_v1.hpp"
 #include "board_v2.hpp"
@@ -18,6 +21,10 @@
 #include "stats.hpp"
 #include "best_first_search.hpp"
 #include "greedy.hpp"
+#include "board_v4.hpp"
+#include "beam_search_v4.hpp"
+
+using namespace ant;
 
 
 vector<string> readBoard(istream& cin) {
@@ -176,14 +183,84 @@ void TestBeamSearch(ostream& output) {
 //
 //
 
+// probably is going to need special board for this stuff
+void ComputeScoreFunction() {
+    using Board = Board_v4;
+    
+    const int test_count = 200;
+    const int board_size = 50;
+    auto score_function = [](double v) {
+        return [=](const Board board) {
+            return - (board.MirrorsDestroyed() + v * board.EmptyLinesCount());
+        };
+    };
+    
+    vector<vector<string>> test_boards(test_count);
+    for (int i = 0; i < test_count; ++i) {
+        test_boards[i] = GenerateStringBoard(board_size);
+    }
+    
+    auto objective = [&](double variable) {
+        auto func = score_function(variable);
+        double total_casts = 0;
+        // try to create multiple threads here
+        for (int i = 0; i < test_count; ++i) {
+            Greedy greedy;
+            Board board(test_boards[i]);
+            int cast_count = greedy.Destroy(board, func).CastCount();
+            total_casts += cast_count;
+        }
+        cout << "computed at: " << variable << " casts: " << total_casts/test_count <<  endl;
+        return total_casts;
+    };
+    
+    double variable = opt::GoldenSectionSearch(0., board_size, objective, 0.01);
+    cout << variable << endl;
+}
+
+void Test_V4() {
+    using Board = Board_v4;
+    Board b(GenerateStringBoard(75));
+    BeamSearch_v4 bs;
+    cout << bs.Destroy(b, 2000, 11.99, 1).CastCount();
+    
+    
+}
+
+void ComputeReduceFrequency() {
+    auto str_board = GenerateStringBoard(75);
+    Board_v4 b(str_board);
+    auto objective = [&](double variable) {
+        clock_t start = clock();
+        BeamSearch_v4 bs;
+        bs.Destroy(b, 200, 11.99, variable);
+        clock_t result = clock() - start;
+        cout << "at: " << variable << " clock: " << result << endl;
+        return result;
+    };
+    opt::GoldenSectionSearch(0, 1, objective, 0.01);
+}
+
+
 
 
 
 int main(int argc, const char * argv[])
 {
     if (argc == 1) {
+
+        ComputeReduceFrequency();
+        return 0;
+
+        Test_V4();
+        return 0;
+
+        ComputeScoreFunction();
+        return 0;
+
         //ifstream stat_in("stats.txt");
         //auto coeffs = ReadDestroyedCoeffs(stat_in);
+
         Chokudai ch;
         
         BeamSearch bs;

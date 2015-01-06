@@ -10,7 +10,15 @@
 
 #include "util.hpp"
 
+#ifdef DEBUG
+
 default_random_engine RNG;
+
+#else
+
+default_random_engine RNG(std::chrono::system_clock::now().time_since_epoch().count());
+
+#endif
 
 vector<string> GenerateStringBoard(int sz) {
     discrete_distribution<int> distr{0.5, 0.5};

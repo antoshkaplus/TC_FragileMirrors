@@ -8,6 +8,8 @@
 //  each step for the winning algorithm.
 //  should keep it inside another Position, probably template char
 //
+// usage of shared_ptr<CastNode>
+
 
 #ifndef FRAGILE_MIRRORS_board2_hpp
 #define FRAGILE_MIRRORS_board2_hpp

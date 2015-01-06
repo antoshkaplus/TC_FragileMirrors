@@ -11,4 +11,4 @@
 
 #include "board_v3.hpp"
 
-constexpr const array<int, 5> Board_v3::kDirOpposite;
+//constexpr const array<int, 5> Board_v3::kDirOpposite;
