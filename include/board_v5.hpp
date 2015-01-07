@@ -1,18 +1,17 @@
 //
-//  board_v4.hpp
+//  board_v5.hpp
 //  FRAGILE_MIRRORS
 //
-//  Created by Anton Logunov on 1/4/15.
+//  Created by Anton Logunov on 1/7/15.
 //
-//
+// like board_v4 but we exclude even lines counter
 
-#ifndef FRAGILE_MIRRORS_board_v4_hpp
-#define FRAGILE_MIRRORS_board_v4_hpp
+#ifndef FRAGILE_MIRRORS_board_v5_hpp
+#define FRAGILE_MIRRORS_board_v5_hpp
 
-#include "board_v3.hpp"
+#include "board_v4.hpp"
 
-
-class Board_v4 {
+class Board_v5 {
 private:
     
     using int8_t = short;
@@ -32,15 +31,15 @@ private:
     
     const constexpr static char kOrientHor = 0;
     const constexpr static char kOrientVer = 1;
-
+    
     using Direction = char;
     using Mirror = char;
     using Neighbors = array<short, 4>;
-
+    
     using HashFunction = ZobristHashing<HashBitsCount>;
 public:
     using HashType = typename HashFunction::value;
-
+    
 private:
     // probably can place deleted and 
     struct Item {
@@ -50,7 +49,7 @@ private:
         char mirror;
         bool destroyed;
     };
-
+    
     struct Ray {
         Ray(short pos, Direction dir) 
         : pos(pos), dir(dir) {}
@@ -66,7 +65,7 @@ private:
         kDirLeft, 
         kDirNothing
     } };
-
+    
     // first index mirror type
     // second index where ray going
     // result direction where will go  
@@ -94,13 +93,8 @@ private:
     // where is ray directed
     vector<Direction> ray_direction_;
     
-    array<vector<Count>, 2> mirrors_left_; 
     Count empty_lines_count_;
-    Count even_mirrors_lines_;
-    
     Count board_size_;
-    // can make use of cast node actually
-    // vector<>
     
     Count filled_space_;
     Count empty_space_;
@@ -112,26 +106,20 @@ private:
     shared_ptr<HashFunction> hash_function_;
     HashType hash_;
     
-    // hash function
-    
     shared_ptr<vector<short>> restorable_buffer_;
     shared_ptr<vector<short>> reduce_buffer_;
-          
+    
 public:
     
-    Board_v4() {}
+    Board_v5() {}
     
-    Board_v4(const vector<string>& str_board) {
+    Board_v5(const vector<string>& str_board) {
         filled_space_ = str_board.size()*str_board.size();
         empty_space_ = 0;
         
         board_size_ = str_board.size();
         mirrors_destroyed_ = 0;
-        even_mirrors_lines_ = 2 * board_size_ * (board_size_ % 2 == 0 ? 1 : 0);
         empty_lines_count_ = 0;
-        
-        mirrors_left_[kOrientHor].resize(board_size_, board_size_);
-        mirrors_left_[kOrientVer].resize(board_size_, board_size_);
         
         items_.resize(4*board_size_ + board_size_*board_size_);
         ray_direction_.resize(4*board_size_);
@@ -255,7 +243,7 @@ public:
         empty_space_ += count;
         filled_space_ -= count;
         mirrors_destroyed_ += count;
-
+        
     }
     
     void Restore() {
@@ -395,11 +383,11 @@ public:
     Count EmptyLinesCount() const {
         return empty_lines_count_;
     }
-
+    
     Count EvenLinesCount() const {
         return even_mirrors_lines_;
     }
-
+    
     HashType hash() const {
         return hash_;
     }
@@ -411,11 +399,11 @@ public:
     Count FilledSpace() const {
         return filled_space_;
     }
-
+    
     shared_ptr<CastNode> CastHistory() const {
         return history_casts_;
     }
-
+    
 private: 
     
     void HashIn(char row, char col) {
@@ -435,7 +423,7 @@ private:
         hash_function_->xorState(&hash_, p, 0); // xor out
         hash_function_->xorNothing(&hash_); // xor in
     }
-
+    
     Ray NextFromMirror(const Ray& ray) const {
         Direction dir = kDirReflection[items_[ray.pos].mirror][ray.dir];
         return {items_[ray.pos].neighbors[dir], dir};
@@ -475,9 +463,8 @@ private:
             }
         }
     }
-
-
+    
+    
 };
-
 
 #endif

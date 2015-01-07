@@ -30,5 +30,3 @@ vector<string> GenerateStringBoard(int sz) {
     }
     return strBoard;
 }
-
-

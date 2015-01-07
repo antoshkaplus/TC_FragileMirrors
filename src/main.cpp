@@ -23,6 +23,7 @@
 #include "greedy.hpp"
 #include "board_v4.hpp"
 #include "beam_search_v4.hpp"
+#include "board_v5.hpp"
 
 using namespace ant;
 
@@ -207,7 +208,7 @@ void ComputeScoreFunction() {
         for (int i = 0; i < test_count; ++i) {
             Greedy greedy;
             Board board(test_boards[i]);
-            int cast_count = greedy.Destroy(board, func).CastCount();
+            int cast_count = CastNode::Count(greedy.Destroy(board, func).CastHistory());
             total_casts += cast_count;
         }
         cout << "computed at: " << variable << " casts: " << total_casts/test_count <<  endl;
@@ -218,44 +219,74 @@ void ComputeScoreFunction() {
     cout << variable << endl;
 }
 
+void ComputeEvenLinesParam() {
+    using Board = Board_v4;
+    
+    const int test_count = 200;
+    const int board_size = 75;
+    auto score_function = [](double v) {
+        return [=](const Board board) {
+            return - (board.MirrorsDestroyed() + 11.99 * board.EmptyLinesCount() + v * board.EvenLinesCount());
+        };
+    };
+    
+    vector<vector<string>> test_boards(test_count);
+    for (int i = 0; i < test_count; ++i) {
+        test_boards[i] = GenerateStringBoard(board_size);
+    }
+    
+    auto objective = [&](double variable) {
+        auto func = score_function(variable);
+        double total_casts = 0;
+        // try to create multiple threads here
+        for (int i = 0; i < test_count; ++i) {
+            Greedy greedy;
+            Board board(test_boards[i]);
+            int cast_count = CastNode::Count(greedy.Destroy(board, func).CastHistory());
+            total_casts += cast_count;
+        }
+        cout << "computed at: " << variable << " casts: " << total_casts/test_count <<  endl;
+        return total_casts;
+    };
+    
+    double variable = opt::GoldenSectionSearch(0., 0.4, objective, 0.01);
+    cout << variable << endl;
+}
+
+
 void Test_V4() {
     using Board = Board_v4;
     Board b(GenerateStringBoard(75));
     BeamSearch_v4 bs;
-    cout << bs.Destroy(b, 2000, 11.99, 1).CastCount();
-    
-    
+    cout << CastNode::Count(bs.Destroy(b, 2000, 11.99, 1).CastHistory());
 }
 
 void ComputeReduceFrequency() {
-    auto str_board = GenerateStringBoard(75);
+    auto str_board = GenerateStringBoard(90);
     Board_v4 b(str_board);
     auto objective = [&](double variable) {
         clock_t start = clock();
         BeamSearch_v4 bs;
-        bs.Destroy(b, 200, 11.99, variable);
+        bs.Destroy(b, 200, 8.24, variable);
         clock_t result = clock() - start;
         cout << "at: " << variable << " clock: " << result << endl;
         return result;
     };
-    opt::GoldenSectionSearch(0, 1, objective, 0.01);
+    double variable = opt::GoldenSectionSearch(0, 1, objective, 0.005);
+    cout << variable << endl;
 }
-
-
-
-
 
 int main(int argc, const char * argv[])
 {
     if (argc == 1) {
 
-        ComputeReduceFrequency();
-        return 0;
-
-        Test_V4();
-        return 0;
-
-        ComputeScoreFunction();
+//        ComputeReduceFrequency();
+//        return 0;
+//
+//        Test_V4();
+//        return 0;
+//
+        ComputeEvenLinesParam();
         return 0;
 
         //ifstream stat_in("stats.txt");

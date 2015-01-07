@@ -38,6 +38,7 @@ struct Greedy {
     Board Destroy(const Board& b, const Func& func) {
         Board board = b;
         while (!board.AllDestroyed()) {
+            if (board.EmptySpace() > 0.5 * board.FilledSpace()) board.Reduce();
             double best_score = numeric_limits<double>::max();
             short best_ray;
             for (int ray = 0; ray < board.RayCount(); ++ray) {

@@ -60,4 +60,26 @@ struct CastIterator {
 };
 
 
+struct CastNode {
+    CastNode(const Position& cast, const shared_ptr<CastNode>& previous)
+     : cast{cast}, previous{previous} {}
+
+    static Count Count(shared_ptr<CastNode> node) {
+        ant::Count count = 0;
+        while (node) {
+            ++count;
+            node = node->previous;
+        }
+        return count;
+    }
+
+    
+    Position cast;
+    shared_ptr<CastNode> previous;
+};
+
+using Direction = char;
+
+
+
 #endif /* defined(__FRAGILE_MIRRORS__util__) */

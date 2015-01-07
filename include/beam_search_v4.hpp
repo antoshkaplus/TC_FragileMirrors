@@ -72,28 +72,25 @@ public:
     
 private:
     
-    // bs - where to write results
-    void FillBoards(const vector<Derivative>& derivs, 
-                    vector<Index>& inds,
-                    vector<Board>& bs) {
-//        
+//    void FillBoards(const vector<Derivative>& derivs, 
+//                         vector<Index>& inds,
+//                         vector<Board>& bs) {
 //        bs.resize(inds.size());
 //        for (auto k = 0; k < bs.size(); ++k) {
 //            Board& b = bs[k];
 //            b = *(derivs[inds[k]].origin);
 //            b.Cast(derivs[inds[k]].ray_index);
 //        }
-//        return;
-//        
-        
-        vector<uint64_t> hashes(inds.size());
-        for (int i = 0; i < inds.size(); ++i) {
-            hashes[i] = derivs[inds[i]].origin->hash().to_ullong();
-        }
+//    }
+    
+    // bs - where to write results
+    void FillBoards(const vector<Derivative>& derivs, 
+                    vector<Index>& inds,
+                    vector<Board>& bs) {
+
         sort(inds.begin(), inds.end(), [&](Index i_0, Index i_1) {
-            return hashes[i_0] < hashes[i_1];
+            return derivs[i_0].origin < derivs[i_1].origin;
         });
-        sort(hashes.begin(), hashes.end());
         
         bs.resize(inds.size());
         vector<short> rays;
@@ -102,14 +99,15 @@ private:
             Index start = i;
             rays.clear();
             rays.push_back(derivs[inds[start]].ray_index);
-            while (hashes[start] == hashes[++i]) {
+            while (++i < bs.size() && derivs[inds[start]].origin == derivs[inds[i]].origin) {
                 rays.push_back(derivs[inds[i]].ray_index);
             }
-            if (true) {
-                derivs[inds[start]].origin->Reduce(rays);
+            auto& b_or = *(derivs[inds[start]].origin);  
+            if (b_or.EmptySpace() > reduce_param * b_or.FilledSpace()) {
+                b_or.Reduce(rays);
             }
             for (Index k = 0; k < rays.size(); ++k) {
-                bs[start + k] = *(derivs[inds[start]].origin);
+                bs[start + k] = b_or;
                 bs[start + k].Cast(rays[k]);
             }
         }
