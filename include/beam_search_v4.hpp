@@ -4,7 +4,11 @@
 //
 //  Created by Anton Logunov on 1/5/15.
 //
-//
+// the changes should help a little definetly. 
+
+
+
+
 
 #ifndef FRAGILE_MIRRORS_beam_search_v4_hpp
 #define FRAGILE_MIRRORS_beam_search_v4_hpp
@@ -46,6 +50,9 @@ public:
         // has move semantics now 
         vector<Board> current;
         vector<Board> next;
+        // vector<shared_ptr<Board>> current
+        // vector<shared_ptr<Board>> next
+        
         vector<Derivative> next_casts;  
         vector<Index> inds;
         Hashes hashes;
@@ -93,6 +100,13 @@ private:
         });
         
         bs.resize(inds.size());
+        // for (int i = 0; i < bs.size(); ++i) {
+        //     // using bool operator
+        //     if (!bs[i]) {
+        //         bs[i].reset(new Board_v4());
+        //     }
+        // }
+        
         vector<short> rays;
         Index i = 0;
         while (i < bs.size()) {
@@ -102,11 +116,19 @@ private:
             while (++i < bs.size() && derivs[inds[start]].origin == derivs[inds[i]].origin) {
                 rays.push_back(derivs[inds[i]].ray_index);
             }
+            // 
             auto& b_or = *(derivs[inds[start]].origin);  
             if (b_or.EmptySpace() > reduce_param * b_or.FilledSpace()) {
                 b_or.Reduce(rays);
             }
             for (Index k = 0; k < rays.size(); ++k) {
+                // if (k == rays.size()-1) {
+                //     // swapping shared_ptrs
+                //     swap(bs[start + k], b_or);
+                //     bs[start+k].Cast(rays[k])
+                //     continue;
+                // } 
+                
                 bs[start + k] = b_or;
                 bs[start + k].Cast(rays[k]);
             }
