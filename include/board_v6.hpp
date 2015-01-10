@@ -1,22 +1,17 @@
 //
-//  board_v5.hpp
+//  board_v6.hpp
 //  FRAGILE_MIRRORS
 //
-//  Created by Anton Logunov on 1/7/15.
+//  Created by Anton Logunov on 1/8/15.
 //
-// like board_v4 but we exclude even lines counter
+//
 
-#ifndef FRAGILE_MIRRORS_board_v5_hpp
-#define FRAGILE_MIRRORS_board_v5_hpp
+#ifndef FRAGILE_MIRRORS_board_v6_hpp
+#define FRAGILE_MIRRORS_board_v6_hpp
 
 #include "util.hpp"
 
-#include <array>
-
-using namespace std;
-
-
-class Board_v5 {
+class Board_v6 {
 private:
     
     using int8_t = short;
@@ -47,7 +42,7 @@ public:
     using HashType = typename HashFunction::value;
     
 private:
-       
+    
     struct Ray {
         Ray(short pos, Direction dir) 
         : pos(pos), dir(dir) {}
@@ -55,6 +50,12 @@ private:
         short pos;
         Direction dir; 
     };    
+    
+    struct Item {
+        array<short, 4> ns;
+        char row;
+        char col; 
+    };
     
     constexpr const static array<int, 5> kDirOpposite = { {
         kDirBottom, 
@@ -94,12 +95,10 @@ private:
     
     HashType hash_;
     
-    vector<Neighbors> neighbors_;
+    vector<Item> items_;
     // they are first in items
     // where is ray directed
     vector<Direction> ray_direction_;
-    vector<char> rows_;
-    vector<char> cols_;
     array<vector<char>, 2> mirrors_left_;
     
     shared_ptr<Mirrors> mirrors_;
@@ -110,9 +109,9 @@ private:
     
 public:
     
-    Board_v5() {}
+    Board_v6() {}
     
-    Board_v5(const vector<string>& str_board) {
+    Board_v6(const vector<string>& str_board) {
         board_size_ = str_board.size();
         mirrors_destroyed_ = 0;
         empty_lines_count_ = 0;
@@ -120,8 +119,7 @@ public:
         filled_space_ = str_board.size()*str_board.size();
         empty_space_ = 0;
         
-        
-        InitNeighbors();
+        InitItems();
         mirrors_left_[kOrientHor].resize(board_size_, board_size_);
         mirrors_left_[kOrientVer].resize(board_size_, board_size_);
         InitHash();
@@ -132,11 +130,9 @@ public:
     
 private:
     
-    void InitNeighbors() {
-        neighbors_.resize(4*board_size_ + board_size_*board_size_);
+    void InitItems() {
+        items_.resize(4*board_size_ + board_size_*board_size_);
         ray_direction_.resize(4*board_size_);
-        rows_.resize(neighbors_.size());
-        cols_.resize(neighbors_.size());
         
         // initializing inner links
         auto offset = 4*board_size_;
@@ -146,13 +142,13 @@ private:
         for (int r = 0; r < board_size_; ++r) {
             for (int c = 0; c < board_size_; ++c) {
                 Index i = ToIndex(r, c);
-                auto& ns = neighbors_[i];
-                ns[kDirTop] = ToIndex(r-1, c);
-                ns[kDirRight] = ToIndex(r, c+1);
-                ns[kDirBottom] = ToIndex(r+1, c);
-                ns[kDirLeft] = ToIndex(r, c-1);
-                rows_[i] = r;
-                cols_[i] = c;
+                auto& t = items_[i];
+                t.ns[kDirTop] = ToIndex(r-1, c);
+                t.ns[kDirRight] = ToIndex(r, c+1);
+                t.ns[kDirBottom] = ToIndex(r+1, c);
+                t.ns[kDirLeft] = ToIndex(r, c-1);
+                t.row = r;
+                t.col = c;
             }
         }
         // initializing border links
@@ -160,48 +156,48 @@ private:
             int s = 4*i;
             int m_i; // mirror index
             int b_i; // border index
-        
+            
             // TOP
             m_i = ToIndex(0, i);
             b_i = s + kDirTop;
             
-            neighbors_[b_i].fill(-1);
-            neighbors_[b_i][kDirBottom] = m_i;
-            rows_[b_i] = -1;
-            cols_[b_i] = i;
+            items_[b_i].ns.fill(-1);
+            items_[b_i].ns[kDirBottom] = m_i;
+            items_[b_i].row = -1;
+            items_[b_i].col = i;
             ray_direction_[b_i] = kDirBottom;
-            neighbors_[m_i][kDirTop] = b_i;
+            items_[m_i].ns[kDirTop] = b_i;
             
             
             // RIGHT
             m_i = ToIndex(i, board_size_-1);
             b_i = s + kDirRight;
-            neighbors_[b_i].fill(-1);
-            neighbors_[b_i][kDirLeft] = m_i;
-            rows_[b_i] = i;
-            cols_[b_i] = board_size_;
+            items_[b_i].ns.fill(-1);
+            items_[b_i].ns[kDirLeft] = m_i;
+            items_[b_i].row = i;
+            items_[b_i].col = board_size_;
             ray_direction_[b_i] = kDirLeft;
-            neighbors_[m_i][kDirRight] = b_i;
+            items_[m_i].ns[kDirRight] = b_i;
             
             // BOTTOM
             m_i = ToIndex(board_size_-1, i);
             b_i = s + kDirBottom;
-            neighbors_[b_i].fill(-1);
-            neighbors_[b_i][kDirTop] = m_i;
-            rows_[b_i] = board_size_;
-            cols_[b_i] = i;
+            items_[b_i].ns.fill(-1);
+            items_[b_i].ns[kDirTop] = m_i;
+            items_[b_i].row = board_size_;
+            items_[b_i].col = i;
             ray_direction_[b_i] = kDirTop;
-            neighbors_[m_i][kDirBottom] = b_i;
+            items_[m_i].ns[kDirBottom] = b_i;
             
             // LEFT
             m_i = ToIndex(i, 0);
             b_i = s + kDirLeft; 
-            neighbors_[b_i].fill(-1);
-            neighbors_[b_i][kDirRight] = m_i;
-            rows_[b_i] = i;
-            cols_[b_i] = -1;
+            items_[b_i].ns.fill(-1);
+            items_[b_i].ns[kDirRight] = m_i;
+            items_[b_i].row = i;
+            items_[b_i].col = -1;
             ray_direction_[b_i] = kDirRight;
-            neighbors_[m_i][kDirLeft] = b_i;
+            items_[m_i].ns[kDirLeft] = b_i;
         }
     }
     
@@ -234,8 +230,8 @@ public:
         Ray ray{ray_index, ray_direction_[ray_index]};
         ray = NextFromEmpty(ray);
         while (ray.pos >= ray_direction_.size()) {
-            char r = rows_[ray.pos];
-            char c = cols_[ray.pos];
+            char r = items_[ray.pos].row;
+            char c = items_[ray.pos].col;
             if (mirs(r, c) >= kMirOffset) {
                 ray = NextFromEmpty(ray);
                 continue;
@@ -251,15 +247,15 @@ public:
     
     void Cast(short ray_index) {
         auto& mirs = *mirrors_;
-        shared_ptr<CastNode> new_node(new CastNode({rows_[ray_index], cols_[ray_index]}, history_casts_));
+        shared_ptr<CastNode> new_node(new CastNode({items_[ray_index].row, items_[ray_index].col}, history_casts_));
         history_casts_ = new_node;
         
         Ray ray = NextFromBorder(ray_index);
         Count count = 0;
         while (ray.pos >= ray_direction_.size()) {
-            Destroy(rows_[ray.pos], cols_[ray.pos]);
+            Destroy(items_[ray.pos].row, items_[ray.pos].col);
             DestroyLinks(ray.pos);
-            ray = NextFromMirror(ray, mirs(rows_[ray.pos], cols_[ray.pos]));
+            ray = NextFromMirror(ray, mirs(items_[ray.pos].row, items_[ray.pos].col));
             ++count;
         }    
         empty_space_ += count;
@@ -274,8 +270,8 @@ public:
         
         mirrors_destroyed_ -= last.size();
         while (!last.empty()) {
-            char r = rows_[last.back()];
-            char c = cols_[last.back()];
+            char r = items_[last.back()].row;
+            char c = items_[last.back()].col;
             mirs(r, c) -= kMirOffset;
             Restore(r, c);
             last.pop_back();
@@ -295,11 +291,11 @@ public:
     }
     
     void DestroyLinks(short index) {
-        auto& ns = neighbors_[index];
-        neighbors_[ns[kDirTop]][kDirBottom] = ns[kDirBottom];
-        neighbors_[ns[kDirBottom]][kDirTop] = ns[kDirTop];
-        neighbors_[ns[kDirLeft]][kDirRight] = ns[kDirRight];
-        neighbors_[ns[kDirRight]][kDirLeft] = ns[kDirLeft];
+        auto& ns = items_[index].ns;
+        items_[ns[kDirTop]].ns[kDirBottom] = ns[kDirBottom];
+        items_[ns[kDirBottom]].ns[kDirTop] = ns[kDirTop];
+        items_[ns[kDirLeft]].ns[kDirRight] = ns[kDirRight];
+        items_[ns[kDirRight]].ns[kDirLeft] = ns[kDirLeft];
     }
     
     void Restore(char row, char col) {
@@ -312,10 +308,6 @@ public:
         HashIn({row, col});
     }
     
-    bool IsEmptyLine(short ray_index) {
-        return NextFromBorder(ray_index).pos < RayCount();
-        
-    }
     
     void Reduce(vector<short>& shift) {
         Reduce();
@@ -328,7 +320,7 @@ public:
     // 4 * Number of items
     void Reduce() {
         auto& offset = *buffer_;
-        offset.resize(neighbors_.size());
+        offset.resize(items_.size());
         auto cur = 0;
         for (auto i = 0; i < ray_direction_.size(); ++i) {
             if (IsEmptyLine(i)) {
@@ -336,14 +328,14 @@ public:
             } 
             offset[i] = cur;
         }
-        for (auto i = ray_direction_.size(); i < neighbors_.size(); ++i) {
-            if (neighbors_[neighbors_[i][kDirTop]][kDirBottom] != i) {
+        for (auto i = ray_direction_.size(); i < items_.size(); ++i) {
+            if (items_[items_[i].ns[kDirTop]].ns[kDirBottom] != i) {
                 ++cur;
             } 
             offset[i] = cur;
         }
         if (offset[0] == 0) {
-            short& p = neighbors_[0][ray_direction_[0]];
+            short& p = items_[0].ns[ray_direction_[0]];
             p -= offset[p];
         }
         for (auto i = 1; i < ray_direction_.size(); ++i) {
@@ -351,37 +343,34 @@ public:
                 // increased cur on i pos: deleted element
                 continue;
             }
-            short& p = neighbors_[i][ray_direction_[i]];
+            short& p = items_[i].ns[ray_direction_[i]];
             p -= offset[p];
-            auto diff = i - offset[i];
-            neighbors_[diff] = neighbors_[i];
-            ray_direction_[diff] = ray_direction_[i];
-            rows_[diff] = rows_[i];
-            cols_[diff] = cols_[i];
+            items_[i - offset[i]] = items_[i];
+            ray_direction_[i - offset[i]] = ray_direction_[i];
         }
-        for (auto i = ray_direction_.size(); i < neighbors_.size(); ++i) {
+        for (auto i = ray_direction_.size(); i < items_.size(); ++i) {
             if (offset[i-1] != offset[i]) {
                 continue;
             }
-            auto& ns = neighbors_[i]; 
+            auto& ns = items_[i].ns; 
             for (int q = 0; q < 4; ++q) {
                 ns[q] -= offset[ns[q]];
             }
-            auto diff = i - offset[i];
-            neighbors_[diff] = neighbors_[i];
-            rows_[diff] = rows_[i];
-            cols_[diff] = cols_[i];
+            items_[i - offset[i]] = items_[i];
         }
         // now resize both vectors
         auto last = ray_direction_.size()-1;
         ray_direction_.resize(last + 1 - offset[last]);
-        last = neighbors_.size()-1;
-        neighbors_.resize(last + 1 - offset[last]);
-        rows_.resize(neighbors_.size());
-        cols_.resize(neighbors_.size());
+        last = items_.size()-1;
+        items_.resize(last + 1 - offset[last]);
         
         empty_space_ = 0;
-        filled_space_ = neighbors_.size() - ray_direction_.size();
+        filled_space_ = items_.size() - ray_direction_.size();
+    }
+    
+    bool IsEmptyLine(short ray_index) {
+        return NextFromBorder(ray_index).pos < RayCount();
+        
     }
     
     bool AllDestroyed() const {
@@ -442,19 +431,20 @@ private:
     
     Ray NextFromMirror(const Ray& ray, char mir) const {
         Direction dir = kDirReflection[mir][ray.dir];
-        return {neighbors_[ray.pos][dir], dir};
+        return {items_[ray.pos].ns[dir], dir};
     }
     
     Ray NextFromBorder(short ray_index) const {
         Direction dir = ray_direction_[ray_index];
-        return {neighbors_[ray_index][dir], dir};
+        return {items_[ray_index].ns[dir], dir};
     }
     
     // same as for FromBorder
     Ray NextFromEmpty(const Ray& ray) const {
-        return {neighbors_[ray.pos][ray.dir], ray.dir};
+        return {items_[ray.pos].ns[ray.dir], ray.dir};
     }
     
 };
+
 
 #endif

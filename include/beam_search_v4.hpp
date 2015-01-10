@@ -11,11 +11,10 @@
 
 #include "board_v4.hpp"
 
-struct BeamSearch_v4 {
-    
+template<class Board>
+struct BeamSearch_v2 {
 private:
-    using Board = Board_v4;
-    using Hash = Board::HashType; 
+    using Hash = typename Board::HashType; 
     
     struct Derivative {
         Derivative() {}
@@ -29,7 +28,7 @@ private:
     };
     
     double empty_lines_param_{0};
-    double reduce_param{0};
+    double overhead_param_{1};
     
     // our goal is to minimize
     double Score(const Board& b) const {
@@ -39,10 +38,12 @@ private:
 public:
     using BoardType = Board;
     using Hashes = unordered_set<typename Board::HashType>;
-        
-    Board Destroy(const Board& board, Count beam_width, double empty_lines_param, double reduce_param) {
+    
+    Board Destroy(const Board& board, Count beam_width, double empty_lines_param, double overhead_param) {
         empty_lines_param_ = empty_lines_param;
-        vector<Board>::iterator res;
+        overhead_param_  = overhead_param;
+        assert(overhead_param_ >= 1.);
+        typename vector<Board>::iterator res;
         // has move semantics now 
         vector<Board> current;
         vector<Board> next;
@@ -56,7 +57,7 @@ public:
             }
             // current iteration changed
             // dublicates overhead
-            SelectBoardIndexes(next_casts, inds, beam_width + 100);
+            SelectBoardIndexes(next_casts, inds, overhead_param_*beam_width);
             RemoveDublicates(next_casts, inds, hashes);
             inds.resize(min<Count>(inds.size(), beam_width));
             FillBoards(next_casts, inds, next);
@@ -71,18 +72,7 @@ public:
     }    
     
 private:
-    
-//    void FillBoards(const vector<Derivative>& derivs, 
-//                         vector<Index>& inds,
-//                         vector<Board>& bs) {
-//        bs.resize(inds.size());
-//        for (auto k = 0; k < bs.size(); ++k) {
-//            Board& b = bs[k];
-//            b = *(derivs[inds[k]].origin);
-//            b.Cast(derivs[inds[k]].ray_index);
-//        }
-//    }
-    
+
     // bs - where to write results
     void FillBoards(const vector<Derivative>& derivs, 
                     vector<Index>& inds,
@@ -102,10 +92,7 @@ private:
             while (++i < bs.size() && derivs[inds[start]].origin == derivs[inds[i]].origin) {
                 rays.push_back(derivs[inds[i]].ray_index);
             }
-            auto& b_or = *(derivs[inds[start]].origin);  
-            if (b_or.EmptySpace() > reduce_param * b_or.FilledSpace()) {
-                b_or.Reduce(rays);
-            }
+            auto& b_or = *(derivs[inds[start]].origin); 
             for (Index k = 0; k < rays.size(); ++k) {
                 bs[start + k] = b_or;
                 bs[start + k].Cast(rays[k]);

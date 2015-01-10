@@ -9,8 +9,9 @@
 #ifndef FRAGILE_MIRRORS_board_v4_hpp
 #define FRAGILE_MIRRORS_board_v4_hpp
 
-#include "board_v3.hpp"
+#include "util.hpp"
 
+using namespace std;
 
 class Board_v4 {
 private:
@@ -35,21 +36,22 @@ private:
 
     using Direction = char;
     using Mirror = char;
-    using Neighbors = array<short, 4>;
+    using Neighbors = std::array<short, 4>;
 
-    using HashFunction = ZobristHashing<HashBitsCount>;
+    using HashFunction = ant::grid::ZobristHashing<HashBitsCount>;
 public:
     using HashType = typename HashFunction::value;
 
 private:
     // probably can place deleted and 
-    struct Item {
+    // __declspec(align(16))
+    struct Item  {
         Neighbors neighbors;
         int8_t row;
         int8_t col;
         char mirror;
         bool destroyed;
-    };
+    }; 
 
     struct Ray {
         Ray(short pos, Direction dir) 
@@ -94,7 +96,7 @@ private:
     // where is ray directed
     vector<Direction> ray_direction_;
     
-    array<vector<Count>, 2> mirrors_left_; 
+    array<vector<char>, 2> mirrors_left_; 
     Count empty_lines_count_;
     Count even_mirrors_lines_;
     
@@ -274,19 +276,19 @@ public:
         if (--mirrors_left_[kOrientHor][col] == 0) {
             ++empty_lines_count_;
             // empty is not counted as even?????
-        } else if (mirrors_left_[kOrientHor][col] % 2 == 0) {
+        } /*else if (mirrors_left_[kOrientHor][col] % 2 == 0) {
             ++even_mirrors_lines_;
         } else {
             --even_mirrors_lines_;
-        }
+        }*/
         
         if (--mirrors_left_[kOrientVer][row] == 0) {
             ++empty_lines_count_;
-        } else if (mirrors_left_[kOrientVer][row] % 2 == 0) {
+        } /*else if (mirrors_left_[kOrientVer][row] % 2 == 0) {
             ++even_mirrors_lines_;
         } else {
             --even_mirrors_lines_;
-        }
+        }*/
         HashOut({row, col});
     }
     
@@ -301,19 +303,19 @@ public:
     void Restore(char row, char col) {
         if (++mirrors_left_[kOrientHor][col] == 1) {
             --empty_lines_count_;
-        } else if (mirrors_left_[kOrientHor][col] % 2 == 0) {
+        } /*else if (mirrors_left_[kOrientHor][col] % 2 == 0) {
             ++even_mirrors_lines_;
         } else {
             --even_mirrors_lines_;
-        }
+        }*/
         
         if (++mirrors_left_[kOrientVer][row] == 1) {
             --empty_lines_count_;
-        } else if (mirrors_left_[kOrientVer][row] % 2 == 0) {
+        } /*else if (mirrors_left_[kOrientVer][row] % 2 == 0) {
             ++even_mirrors_lines_;
         } else {
             --even_mirrors_lines_;
-        }
+        }*/
         HashIn({row, col});
     }
     

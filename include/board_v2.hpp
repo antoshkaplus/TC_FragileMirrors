@@ -233,25 +233,7 @@ public:
         destroyed_count_ += count;
         return count;
     }
-    
-    Count CastRestorable(const Position& p) {
-        Position p = ppp;
-        auto& mirs = *mirrors_;
-        Direction dir = FromDirection(*this, p);
-        tie(p, dir) = NextFrom(p, dir);
-        Count count = 0;
-        while (mirs[p] != kMirBorder) {
-            if (mirs[p] >= kMirOffset) {
-                tie(p, dir) = NextFromEmpty(p, dir);
-            }
-            tie(p, dir) = NextFrom(p, dir);
-            ++count;
-        }    
-        destroyed_count_ += count;
-        return count;
-
-    }
-    
+        
     
     void Restore() {
         --cast_count_;
@@ -389,14 +371,6 @@ private:
         neighbors_(p.row, n[kDirRight])[kDirLeft] = n[kDirLeft];
         HashOut(p);
     }
-    
-    tuple<Position, Direction> NextFromEmpty(const Position& p, Direction d) {
-        return {neighbors_[p][d], d};
-    }
-    
-    Next()
-    
-    
     
     // should initialize only once in constructor probably
     Neighbors neighbors_;

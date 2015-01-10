@@ -8,6 +8,7 @@
 
 #include <iostream>
 #include <random>
+#include <iomanip>
 
 #include "ant/optimization.h"
 
@@ -24,6 +25,8 @@
 #include "board_v4.hpp"
 #include "beam_search_v4.hpp"
 #include "board_v5.hpp"
+#include "board_v6.hpp"
+#include "optimizer.hpp"
 
 using namespace ant;
 
@@ -184,12 +187,13 @@ void TestBeamSearch(ostream& output) {
 //
 //
 
+// base is better make 1000 for faster testing purposes
+// need to add beam_width = base * (100 / board_size)^2
+
 // probably is going to need special board for this stuff
-void ComputeScoreFunction() {
-    using Board = Board_v4;
+template <class Board>
+double ComputeEmptyLinesParam(Count test_count, Count board_size) {
     
-    const int test_count = 200;
-    const int board_size = 50;
     auto score_function = [](double v) {
         return [=](const Board board) {
             return - (board.MirrorsDestroyed() + v * board.EmptyLinesCount());
@@ -206,7 +210,7 @@ void ComputeScoreFunction() {
         double total_casts = 0;
         // try to create multiple threads here
         for (int i = 0; i < test_count; ++i) {
-            Greedy greedy;
+            Greedy<Board> greedy;
             Board board(test_boards[i]);
             int cast_count = CastNode::Count(greedy.Destroy(board, func).CastHistory());
             total_casts += cast_count;
@@ -215,18 +219,17 @@ void ComputeScoreFunction() {
         return total_casts;
     };
     
-    double variable = opt::GoldenSectionSearch(0., board_size, objective, 0.01);
+    double variable = opt::GoldenSectionSearch(0., 20., objective, 0.01);
     cout << variable << endl;
+    return variable;
 }
 
-void ComputeEvenLinesParam() {
-    using Board = Board_v4;
+template<class Board>
+void ComputeEvenLinesParam(Count test_count, Count board_size, double empty_lines_param) {
     
-    const int test_count = 200;
-    const int board_size = 75;
-    auto score_function = [](double v) {
+    auto score_function = [=](double v) {
         return [=](const Board board) {
-            return - (board.MirrorsDestroyed() + 11.99 * board.EmptyLinesCount() + v * board.EvenLinesCount());
+            return - (board.MirrorsDestroyed() + empty_lines_param * board.EmptyLinesCount() + v * board.EvenLinesCount());
         };
     };
     
@@ -240,7 +243,7 @@ void ComputeEvenLinesParam() {
         double total_casts = 0;
         // try to create multiple threads here
         for (int i = 0; i < test_count; ++i) {
-            Greedy greedy;
+            Greedy<Board> greedy;
             Board board(test_boards[i]);
             int cast_count = CastNode::Count(greedy.Destroy(board, func).CastHistory());
             total_casts += cast_count;
@@ -249,44 +252,207 @@ void ComputeEvenLinesParam() {
         return total_casts;
     };
     
-    double variable = opt::GoldenSectionSearch(0., 0.4, objective, 0.01);
+    double variable = opt::GoldenSectionSearch(0., 1., objective, 0.01);
     cout << variable << endl;
 }
 
-
-void Test_V4() {
-    using Board = Board_v4;
-    Board b(GenerateStringBoard(75));
-    BeamSearch_v4 bs;
-    cout << CastNode::Count(bs.Destroy(b, 2000, 11.99, 1).CastHistory());
-}
-
-void ComputeReduceFrequency() {
-    auto str_board = GenerateStringBoard(90);
-    Board_v4 b(str_board);
+template <class Board>
+double ComputeOverheadParam(Count test_count, Count board_size) {
+    
+    vector<vector<string>> test_boards(test_count);
+    for (int i = 0; i < test_count; ++i) {
+        test_boards[i] = GenerateStringBoard(board_size);
+    }
+    
     auto objective = [&](double variable) {
-        clock_t start = clock();
-        BeamSearch_v4 bs;
-        bs.Destroy(b, 200, 8.24, variable);
-        clock_t result = clock() - start;
-        cout << "at: " << variable << " clock: " << result << endl;
-        return result;
+        double total_casts = 0;
+        for (int i = 0; i < test_count; ++i) {
+            BeamSearch_v2<Board> bs;
+            Board b(test_boards[i]);
+            int cast_count = CastNode::Count(bs.Destroy(b, 2000, EMPTY_LINES_PARAM[board_size-50], 1, variable).CastHistory());
+            total_casts += cast_count;
+        }
+        cout << "computed at: " << variable << " casts: " << total_casts/test_count <<  endl;
+        return total_casts + variable / 10000;
     };
-    double variable = opt::GoldenSectionSearch(0, 1, objective, 0.005);
+    
+    double variable = opt::GoldenSectionSearch(1., 4., objective, 0.1);
     cout << variable << endl;
+    return variable;
 }
+
+// optimize runtime
+template<class Board>
+double ComputeReduceParam(Count test_count, Count board_size) {
+    vector<vector<string>> test_boards(test_count);
+    for (int i = 0; i < test_count; ++i) {
+        test_boards[i] = GenerateStringBoard(board_size);
+    }
+    
+    auto objective = [&](double variable) {
+        double time = clock();
+        for (int i = 0; i < test_count; ++i) {
+            BeamSearch_v2<Board> bs;
+            Board b(test_boards[i]);
+            CastNode::Count(bs.Destroy(b, 2000, EMPTY_LINES_PARAM[board_size-50], variable, OVERHEAD_PARAM[board_size-50]).CastHistory());
+        }
+        cout << "computed at: " << variable << " casts: " << (time = clock() - time) <<  endl;
+        return time;
+    };
+    
+    double variable = opt::GoldenSectionSearch(0.2, 10., objective, 0.1);
+    cout << variable << endl;
+    return variable;
+}
+
+
+
+template<class Board>
+void Test_V4() {
+    Board b(GenerateStringBoard(75));
+    BeamSearch_v2<Board> bs;
+    cout << CastNode::Count(bs.Destroy(b, 2000, 11.99, 1, 2.).CastHistory());
+}
+
+
+template<class Board_0, class Board_1>
+void CompareBoards() {
+    auto ss = GenerateStringBoard(75);
+    Board_0 b_0(ss);
+    Board_1 b_1(ss);
+    // b5 is better optimized
+    clock_t ck_0 = clock();
+    BeamSearch_v2<Board_0> bs_0;
+    cout << CastNode::Count(bs_0.Destroy(b_0, 2000, 11.99, 1).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+    ck_0 = clock();
+    BeamSearch_v2<Board_1> bs_1;
+    cout << CastNode::Count(bs_1.Destroy(b_1, 2000, 11.99, 1).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+}
+
+template<class Board>
+void CompareReduction() {
+    auto ss = GenerateStringBoard(75);
+    Board r_half(ss), r_one(ss), r_three(ss);
+    clock_t ck_0 = clock();
+    BeamSearch_v2<Board> bs_0;
+    cout << CastNode::Count(bs_0.Destroy(r_half, 2000, 11.99, 1).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+    ck_0 = clock();
+    BeamSearch_v2<Board> bs_1;
+    cout << CastNode::Count(bs_1.Destroy(r_one, 2000, 11.99, 10000000).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+}
+
+template<class Board> 
+void CompareSwap() {
+    auto ss = GenerateStringBoard(75);
+    Board r_half(ss), r_one(ss), r_three(ss);
+    clock_t ck_0 = clock();
+    BeamSearch_v2<Board> bs_0;
+    cout << CastNode::Count(bs_0.Destroy(r_half, 2000, 11.99, 1).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+    ck_0 = clock();
+    BeamSearch_v2<Board> bs_1;
+    //cout << CastNode::Count(bs_1.Destroy_2(r_one, 2000, 11.99, 1).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+
+}
+
+
+template<class Board>
+void CompareReduce() {
+    auto ss = GenerateStringBoard(75);
+    Board r_half(ss), r_one(ss), r_three(ss);
+    clock_t ck_0 = clock();
+    BeamSearch_v2<Board> bs_0;
+    cout << CastNode::Count(bs_0.Destroy(r_half, 2000, 11.99, 0.5).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+    ck_0 = clock();
+    BeamSearch_v2<Board> bs_1;
+    cout << CastNode::Count(bs_1.Destroy(r_one, 2000, 11.99, 10000).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+    ck_0 = clock();
+    BeamSearch_v2<Board> bs_2;
+    cout << CastNode::Count(bs_2.Destroy(r_three, 2000, 11.99, 1).CastHistory()) << endl;
+    cout << clock() - ck_0 << endl;
+}
+
+//void ComputeReduceFrequency() {
+//    auto str_board = GenerateStringBoard(90);
+//    Board_v4 b(str_board);
+//    auto objective = [&](double variable) {
+//        clock_t start = clock();
+//        BeamSearch_v2<Board_v4> bs;
+//        bs.Destroy(b, 200, 8.24, variable, 1.5);
+//        clock_t result = clock() - start;
+//        cout << "at: " << variable << " clock: " << result << endl;
+//        return result;
+//    };
+//    double variable = opt::GoldenSectionSearch(0, 1, objective, 0.005);
+//    cout << variable << endl;
+//}
+
+
+class FragileMirrors {
+public:
+    vector<int> destroy(vector<string>& board)  {
+        Board_v6 b(board);
+        BeamSearch_v2<Board_v6> bs;
+        b = bs.Destroy(b, 
+                       500 * pow(100. / b.size(), 2), 
+                       EMPTY_LINES_PARAM[b.size()-50], 
+                       OVERHEAD_PARAM[b.size()-50]);
+        auto ps = CastNode::ToHistory(b.CastHistory());
+        vector<int> res;
+        for (auto& p : ps) {
+            res.push_back(p.row);
+            res.push_back(p.col);
+        }
+        return res;
+    }
+};
+
 
 int main(int argc, const char * argv[])
 {
     if (argc == 1) {
 
-//        ComputeReduceFrequency();
+//        CompareReduce<Board_v4>();
 //        return 0;
 //
-//        Test_V4();
+//        Test_V4<Board_v6>();
+//        for (int i = 0; i < 10; ++i) {
+//            CompareSwap<Board_v6>();
+//            //CompareReduction<Board_v6>();
+//            //CompareBoards<Board_v6, Board_v4>();
+//        }
 //        return 0;
-//
-        ComputeEvenLinesParam();
+//  
+//        vector<double> params;
+//        Optimizer<500> optimizer;
+//        double d = optimizer.ComputeReduceParam(10, 50);
+
+//        for (Count c = 50; c <= 100; ++c) {
+//            //double d = ComputeEmptyLinesParam<Board_v6>(20, c);
+//            double d = optimizer.ComputeReduceParam(30, c);
+//            //double d = ComputeReduceParam<Board_v6>(30, c);
+//            params.push_back(d);
+//        }
+        
+        for (int k = 50; k <= 100; ++k) {
+            auto b = GenerateStringBoard(k);
+            FragileMirrors fm;
+            auto r = fm.destroy(b);
+            cout << b.size() << endl;
+            for (int i = 0; i < r.size()/2; ++i) {
+                cout << r[2*i] << ", " << r[2*i + 1] << endl;
+            }
+            cout << endl << endl << endl;
+        }
+        
+        
         return 0;
 
         //ifstream stat_in("stats.txt");
@@ -299,7 +465,7 @@ int main(int argc, const char * argv[])
         //bs.Destroy_2(board, coeffs, 4000);
 //        cout << "ch " <<  ch.destroy(board).size()/2 << endl;
 //        cout << "my " << bs.Destroy(board, 6000, 25).CastCount() << endl;
-        Greedy gr;
+        //Greedy gr;
         BestFirstSearch bbs;
         bbs.Destroy(board);
         return 0;
@@ -354,8 +520,8 @@ int main(int argc, const char * argv[])
         ofstream out(output);
         
         auto str_board = readBoard(in);
-        BeamSearch solver;
-        printSolution(out, solver.Destroy(str_board, 6000).HistoryCasts());
+        FragileMirrors solver;
+     //   printSolution(out, solver.destroy(str_board));
         return 0;
     }
 //    if (parser.exists("test")) {

@@ -9,10 +9,16 @@
 #ifndef FRAGILE_MIRRORS_greedy_hpp
 #define FRAGILE_MIRRORS_greedy_hpp
 
-#include "board_v4.hpp"
+#include "util.hpp"
 
+using namespace std;
+using namespace ant;
+using namespace ant::grid;
+
+
+
+template<class Board>
 struct Greedy {
-    using Board = Board_v4;
 
     struct Derivative {
         Derivative() {}
