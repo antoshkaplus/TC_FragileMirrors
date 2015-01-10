@@ -43,6 +43,14 @@ public:
     using HashType = typename HashFunction::value;
 
 private:
+    // divide this dude on multiple dudes
+    // Neighbors
+    // row, col only for ray.
+    // new hash function with border as changing state based of number of rays from particular place 
+    // mirror = separate dude char array
+    // destroyed = can be known different way
+    // 
+
     // probably can place deleted and 
     // __declspec(align(16))
     struct Item  {
