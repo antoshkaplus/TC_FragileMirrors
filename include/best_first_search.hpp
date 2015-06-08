@@ -12,13 +12,20 @@
 #include <unordered_set>
 #include <algorithm>
 
-#include "board_v2.hpp"
+//#include "board_v2.hpp"
 
+
+/// Score is a function or object with call operator, 
+/// that receives one board argument and returns double that determines
+/// how good the board is, the bigger the better 
+template<class Board, class Score>
 class BestFirstSearch {
-    using Board = Board_v2;
-    using CastNode = Board::CastNode;
-    using HashType = Board::HashType;
+    using CastNode = class Board::CastNode;
+    using HashType = class Board::HashType;
     
+    /**
+     *  struct describes derivative from given board
+     */
     struct Branch {
         Branch() {}
     
@@ -30,16 +37,18 @@ class BestFirstSearch {
         shared_ptr<CastNode> node;
         HashType hash;
         double score;
-        // some other stuff probably score
-        // bigger score is better
+        
+        /// going to sort it and collect best items
+        /// so score should be as high as possible
         bool operator<(const Branch& b) const {
             return score > b.score;
         }
     };
+        
+        
+    Score score_;
+    ostream *output_;
     
-    double Score(const Board& b) {
-        return b.MirrorsDestroyed();
-    }
     
     vector<Branch> Derivatives(Board& b, Count max_count) {
         Count sz = b.size();
@@ -48,7 +57,7 @@ class BestFirstSearch {
             array<Position, 4> cs = { { {i, -1}, {-1, i}, {i, sz}, {sz, i} } };
             for (auto& c : cs) {
                 if (b.Cast(c) > 0) {
-                    derivs.emplace_back(b.HistoryCasts(), b.hash(), Score(b));
+                    derivs.emplace_back(b.HistoryCasts(), b.hash(), score_(b));
                 }
                 b.Restore();
             }
@@ -69,7 +78,7 @@ class BestFirstSearch {
                     if (b.IsLastIsolated()) {
                         isolated.push_back(c);
                     } else {
-                        derivs.emplace_back(b.HistoryCasts(), b.hash(), Score(b));
+                        derivs.emplace_back(b.HistoryCasts(), b.hash(), score_(b));
                     }
                 }
                 b.Restore();
@@ -93,6 +102,7 @@ public:
         bool just_started = true;
         int i = 0;
         while (true) {
+            // output should be made though some sort of handler
             if (++i % 1000 == 0) cout << i << endl;
             Board next_b;
             int level;
@@ -139,7 +149,13 @@ public:
         
     }
 
-
+    void set_score(Score score) {
+        score_ = score;
+    }
+    
+    void set_ostream(ostream& outout) {
+        output_ = &output
+    }
 };
 
 

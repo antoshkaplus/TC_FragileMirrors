@@ -23,7 +23,7 @@
 #include <type_traits>
 #include <tuple>
 
-#include <ant/core.h>
+#include <ant/core/core.hpp>
 #include <ant/grid.h>
 
 #include "util.hpp"

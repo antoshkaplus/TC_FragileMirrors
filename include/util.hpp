@@ -42,7 +42,6 @@ struct CastIterator {
         return cur != 4*sz;
     }
     
-    
     Position Next() {
         Index i = cur % 4;
         Index j = cur / 4;
@@ -60,7 +59,6 @@ struct CastIterator {
     Index cur;
     Count sz;
 };
-
 
 struct CastNode {
     CastNode(const Position& cast, const shared_ptr<CastNode>& previous)
@@ -92,6 +90,10 @@ struct CastNode {
 
 using Direction = char;
 
+
+
+
+// this shit should be out of here!!
 
 // should be somewhere in cpp probably
 // from 50 to 100

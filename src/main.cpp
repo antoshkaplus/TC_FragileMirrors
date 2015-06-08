@@ -10,8 +10,7 @@
 #include <random>
 #include <iomanip>
 
-#include "ant/optimization.h"
-
+#include "ant/optimization/optimization.h"
 
 #include "beam_search.hpp"
 #include "board_v1.hpp"
@@ -466,7 +465,11 @@ int main(int argc, const char * argv[])
 //        cout << "ch " <<  ch.destroy(board).size()/2 << endl;
 //        cout << "my " << bs.Destroy(board, 6000, 25).CastCount() << endl;
         //Greedy gr;
-        BestFirstSearch bbs;
+        auto func = [](Board_v2& b) {
+            return b.MirrorsDestroyed();
+        };
+        BestFirstSearch<Board_v2, decltype(func)> bbs;
+        bbs.set_score(func);
         bbs.Destroy(board);
         return 0;
         

@@ -16,7 +16,7 @@
 #include <type_traits>
 #include <tuple>
 
-#include <ant/core.h>
+#include <ant/core/core.hpp>
 #include <ant/grid.h>
 
 using namespace ant::grid;
@@ -47,8 +47,6 @@ public:
     virtual Count EmptyLinesCount() const {
         return EmptyColCount() + EmptyRowCount();
     }
-    
-    virtual std::unique_ptr<Board> Clone() const = 0;
     
     virtual Count StepCount() const = 0;
     

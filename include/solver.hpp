@@ -18,8 +18,7 @@
 #include <unordered_set>
 #include <forward_list>
 
-#include "ant/core.h"
-#include <ant/optimization.h>
+#include "ant/core/core.hpp"
 
 #include "board.hpp"
 

@@ -1,8 +1,6 @@
 # cmake -DCMAKE_BUILD_TYPE=Debug
 # cmake -DCMAKE_BUILD_TYPE=Release
 
-
-
 cmake_minimum_required (VERSION 2.8.11)
 project (FRAGILE_MIRRORS)
 
