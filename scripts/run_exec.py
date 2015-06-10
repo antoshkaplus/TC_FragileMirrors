@@ -1,6 +1,14 @@
 #!python
 
-input = open("input.txt", "w")
+
+temp_dir = "./../temp/"
+executable = "./../bin/solver"
+
+input_name = temp_dir + "input.txt"
+output_name = temp_dir + "output.txt"
+
+
+input = open(input_name, "w")
 
 n = int(raw_input())
 input.write(str(n) + "\n");
@@ -10,13 +18,14 @@ for i in range(n):
 
 input.close()
 
-executable = "./../build-xcode/Release/FragileMirrors"
 import os
-os.system(executable + " -solve -i input.txt -o output.txt")
+import sys
+os.system(executable + " -i " + input_name + " -o " + output_name)
 
-output = open("output.txt", "r")
+output = open(output_name, "r")
 s = output.read()
 print s
+sys.stdout.flush()
 output.close()
 
 

@@ -12,7 +12,9 @@
 #include <unordered_set>
 #include <algorithm>
 
-//#include "board_v2.hpp"
+//#include "board.hpp"
+
+
 
 
 /// Score is a function or object with call operator, 
@@ -20,13 +22,18 @@
 /// how good the board is, the bigger the better 
 template<class Board, class Score>
 class BestFirstSearch {
-    using CastNode = class Board::CastNode;
-    using HashType = class Board::HashType;
+    using CastNode = typename Board::CastNode;
+    using HashType = typename Board::HashType;
     
     /**
      *  struct describes derivative from given board
      */
     struct Branch {
+        shared_ptr<CastNode> node;
+        HashType hash;
+        double score;
+        
+        
         Branch() {}
     
         Branch(shared_ptr<CastNode> node,
@@ -34,10 +41,6 @@ class BestFirstSearch {
                double score) 
         : node(node), hash(hash), score(score) {}
     
-        shared_ptr<CastNode> node;
-        HashType hash;
-        double score;
-        
         /// going to sort it and collect best items
         /// so score should be as high as possible
         bool operator<(const Branch& b) const {
@@ -47,26 +50,8 @@ class BestFirstSearch {
         
         
     Score score_;
-    ostream *output_;
+    ostream *log_stream_;
     
-    
-    vector<Branch> Derivatives(Board& b, Count max_count) {
-        Count sz = b.size();
-        vector<Branch> derivs;
-        for (int i = 0; i < sz; ++i) {
-            array<Position, 4> cs = { { {i, -1}, {-1, i}, {i, sz}, {sz, i} } };
-            for (auto& c : cs) {
-                if (b.Cast(c) > 0) {
-                    derivs.emplace_back(b.HistoryCasts(), b.hash(), score_(b));
-                }
-                b.Restore();
-            }
-        }
-        int count = min<Count>(max_count, derivs.size());
-        nth_element(derivs.begin(), derivs.begin()+count-1, derivs.end());
-        derivs.resize(count);
-        return derivs;
-    }
     
     vector<Branch> Derivatives(Board& b, Count max_count, vector<Position>& isolated) {
         Count sz = b.size();
@@ -90,20 +75,21 @@ class BestFirstSearch {
         return derivs;
     }
 
-    
+    void Print(string& s) {
+        (*log_stream_) << s << endl;
+    }
     
 public:
     Board Destroy(const Board& b) {
         unordered_set<HashType> explored;
         int per_level_count = 10;
         
+        //
         vector<vector<Branch>> next(2*b.size());
         // while time is not up
         bool just_started = true;
         int i = 0;
         while (true) {
-            // output should be made though some sort of handler
-            if (++i % 1000 == 0) cout << i << endl;
             Board next_b;
             int level;
             if (just_started) {
@@ -153,8 +139,8 @@ public:
         score_ = score;
     }
     
-    void set_ostream(ostream& outout) {
-        output_ = &output
+    void set_log_stream(ostream& output) {
+        log_stream_ = &output
     }
 };
 

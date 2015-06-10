@@ -19,7 +19,7 @@
 #include "board.hpp"
 #include "util.hpp"
 
-template<class Board = Board_v1, size_t beam_width = 2000>
+template<class Board, size_t beam_width = 2000>
 class Stats {
     
 public:
@@ -36,12 +36,12 @@ public:
     
     void Gather(Count sample_size, Count board_size) {
         vector<Board> boards;
-        for (int i = 0; i < sample_size; ++i) {
-            Board board(GenerateStringBoard(board_size));
-            BeamSearch solver;
-            board = solver.Destroy(board, beam_width);
-            boards.push_back(board);
-        }
+//        for (int i = 0; i < sample_size; ++i) {
+//            Board board(GenerateStringBoard(board_size));
+//            BeamSearch solver;
+//            board = solver.Destroy(board, beam_width);
+//            boards.push_back(board);
+//        }
         
         Count max_steps = MaxSteps(boards);
         sample_.resize(max_steps);

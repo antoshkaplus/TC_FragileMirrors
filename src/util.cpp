@@ -30,3 +30,23 @@ vector<string> GenerateStringBoard(int sz) {
     }
     return strBoard;
 }
+
+vector<string> ReadBoard(istream& cin) {
+    int n;
+    cin >> n;
+    vector<string> str_board(n);
+    for (int i = 0; i < n; i++) {
+        cin >> str_board[i];
+    }
+    return str_board;
+}
+
+void PrintSolution(ostream& cout, const vector<Position>& sol) {
+    int n = 2 * sol.size();
+    cout << n << endl;
+    for (int i = 0; i < n; i++) {
+        cout << sol[i].row << endl 
+        << sol[i].col << endl;
+    }
+    
+}

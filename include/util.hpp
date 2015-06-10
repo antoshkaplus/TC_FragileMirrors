@@ -14,6 +14,13 @@
 #include <string>
 #include <random>
 #include <array>
+#include <iostream>
+#include <vector>
+#include <stack>
+#include <type_traits>
+#include <tuple>
+#include <fstream>
+
 
 #include "ant/grid.h"
 
@@ -25,7 +32,8 @@ using namespace ant::grid;
 extern default_random_engine RNG;
 
 vector<string> GenerateStringBoard(int sz);
-
+vector<string> ReadBoard(istream& cin);
+void PrintSolution(ostream& cout, const vector<Position>& sol);
 
 constexpr bool IsRightMirror(char mirror) {
     return mirror == 'R'; // '\'
@@ -90,66 +98,34 @@ struct CastNode {
 
 using Direction = char;
 
+const constexpr int kDirTop      = 0;
+const constexpr int kDirBottom   = 1;
+const constexpr int kDirLeft     = 2;
+const constexpr int kDirRight    = 3;
+const constexpr int kDirNothing  = 4;
+
+const constexpr char kMirRight     = 0;
+const constexpr char kMirLeft      = 1;
+const constexpr char kMirBorder    = 2;
+
+const constexpr char kOrientHor = 0;
+const constexpr char kOrientVer = 1;
+
+constexpr const array<int, 5> kDirOpposite = { {
+    kDirBottom, 
+    kDirTop, 
+    kDirRight, 
+    kDirLeft, 
+    kDirNothing
+} };
+
+
 
 
 
 // this shit should be out of here!!
 
 // should be somewhere in cpp probably
-// from 50 to 100
-constexpr array<double, 51> EMPTY_LINES_PARAM = { {
-    6.396, // 50
-    9.9972,
-    8.33269,
-    10.4997,
-    7.4959,
-    7.9984,
-    7.9984,
-    11.333,
-    7.9984,
-    11.9981,
-    7.9984, // 60
-    9.9972,
-    11.9981,
-    13.3318,
-    10.6623,
-    7.33329,
-    10.9966,
-    14.9963,
-    9.5003,
-    15.9957,
-    6.33389, // 70
-    10.6623,
-    9.9972,
-    12.4985,
-    7.4959,
-    10.9966,
-    8.66351,
-    10.4997,
-    8.5009,
-    9.5003,
-    7.66411, // 80
-    15.4988,
-    10.6623,
-    11.9981,
-    9.9972,
-    14.4994,
-    11.4956,
-    10.3315,
-    10.6623,
-    12.4985,
-    13.5, // 90
-    10.6623,
-    12.4985,
-    13.3318,
-    8.24685,
-    9.9972,
-    12.3324,
-    10.6623,
-    6.4965,
-    11.4956,
-    11.2506 // 100
-} };
 
 constexpr array<double, 51> OVERHEAD_PARAM = { {
     1.700666, // 50

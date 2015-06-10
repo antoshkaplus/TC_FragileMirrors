@@ -9,19 +9,11 @@
 #ifndef __FragileMirrors__board__
 #define __FragileMirrors__board__
 
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <array>
-#include <type_traits>
-#include <tuple>
-
 #include <ant/core/core.hpp>
 #include <ant/grid.h>
 
-using namespace ant::grid;
-using namespace ant;
-using namespace std;
+#include "util.hpp"
+
 
 class Board {
 public:
@@ -53,38 +45,38 @@ public:
     virtual ~Board() {}
 };
 
-class BoardRestorable : public Board {
-public:
-    virtual void Restore() = 0;
-    virtual void RestoreAll() {
-        while (StepCount() != 0) {
-            Restore();
-        }
-    }
-    
-    virtual ~BoardRestorable() {}
-};
+//class BoardRestorable : public Board {
+//public:
+//    virtual void Restore() = 0;
+//    virtual void RestoreAll() {
+//        while (StepCount() != 0) {
+//            Restore();
+//        }
+//    }
+//    
+//    virtual ~BoardRestorable() {}
+//};
 
-class BoardRestorableLimited : public BoardRestorable {
-public:
-    //virtual void Restore() = 0;
-    virtual void set_restore_limit(Count count) = 0;
-    virtual Count restore_limit() = 0;
-    virtual bool CanRestore() = 0;
-    virtual Count restores_left() = 0;
-    
-    virtual ~BoardRestorableLimited() {}
-};
-
-
-class BoardHistory : public Board {
-public:
-    virtual const vector<Position>& HistoryCasts() const = 0;
-    virtual const vector<Count>& HistoryCounts() const = 0;
-    
-    virtual ~BoardHistory() {}
-};
-
+//class BoardRestorableLimited : public BoardRestorable {
+//public:
+//    //virtual void Restore() = 0;
+//    virtual void set_restore_limit(Count count) = 0;
+//    virtual Count restore_limit() = 0;
+//    virtual bool CanRestore() = 0;
+//    virtual Count restores_left() = 0;
+//    
+//    virtual ~BoardRestorableLimited() {}
+//};
+//
+//
+//class BoardHistory : public Board {
+//public:
+//    virtual const vector<Position>& HistoryCasts() const = 0;
+//    virtual const vector<Count>& HistoryCounts() const = 0;
+//    
+//    virtual ~BoardHistory() {}
+//};
+//
 
 // class BoardOneStep
 

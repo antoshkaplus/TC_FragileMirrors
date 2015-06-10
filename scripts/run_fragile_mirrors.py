@@ -1,3 +1,4 @@
+#!python
 """
   Seed = 1, N = 51
   Seed = 2, N = 74
@@ -12,5 +13,7 @@
 
 """
 
+
+import sys
 import os
-os.system(r"java -jar FragileMirrorsVis.jar -exec ./../DerivedData/FragileMirrors/Build/Products/Release/FragileMirrors -seed 9 -pause")
+os.system(r"java -jar FragileMirrorsVis.jar -exec 'python run_exec.py' " + " ".join(sys.argv[1:]))

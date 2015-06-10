@@ -97,8 +97,8 @@ class Visu;
 #define LEFT   2
 #define RIGHT  3
 
-const int DR[] = {-1, 1, 0, 0};
-const int DC[] = {0, 0, -1, 1};
+//const int DR[] = {-1, 1, 0, 0};
+//const int DC[] = {0, 0, -1, 1};
 const int LL[] = {RIGHT, LEFT, BOTTOM, TOP};
 const int RR[] = {LEFT, RIGHT, TOP, BOTTOM};
 const int UL[] = {false, true, false, true};

@@ -9,17 +9,6 @@
 #ifndef FRAGILE_MIRRORS_board_v1_h
 #define FRAGILE_MIRRORS_board_v1_h
 
-#include <iostream>
-#include <vector>
-#include <stack>
-#include <array>
-#include <type_traits>
-#include <tuple>
-
-#include "ant/core/core.hpp"
-#include "ant/grid.h"
-
-#include "util.hpp"
 #include "board.hpp"
 
 using namespace std;
@@ -28,29 +17,36 @@ using namespace ant::grid;
 
 
 class Board_v1 {
+
+    constexpr static size_t HashBitsCount = 64;
+    // supports -1, -1 origin now
+    using Neighbors = OriginGrid<Grid<array<int8_t, 4>>>;
+    using Mirrors = OriginGrid<Grid<int8_t>>;
+public:    
+    using HashFunction = ZobristHashing<HashBitsCount>;
+    using HashType = typename HashFunction::value;
     
-    using Direction = char;
+    using CastType = Position;
+
+private:
+    // should initialize only once in constructor probably
+    Neighbors neighbors_;
+    // sum of history_count_
+    Count destroyed_count_;
+    HashType hash_;
+    Int board_size_;
     
-    const constexpr static int kDirTop      = 0;
-    const constexpr static int kDirBottom   = 1;
-    const constexpr static int kDirLeft     = 2;
-    const constexpr static int kDirRight    = 3;
-    const constexpr static int kDirNothing  = 4;
+    vector<Position> last_cast_;
+    vector<Position> history_casts_;
     
-    const constexpr static char kMirRight     = 0;
-    const constexpr static char kMirLeft      = 1;
-    const constexpr static char kMirBorder    = 2;
+    // those guys are initialized when initialization done
+    // through vector of strings
+    shared_ptr<Mirrors> mirrors_;
+    // assume board_size without borders
+    shared_ptr<HashFunction> hash_function_;
     
-    const constexpr static char kOrientHor = 0;
-    const constexpr static char kOrientVer = 1;
+    vector<Position> cast_candidates_; 
     
-    constexpr const static array<int, 5> kDirOpposite = { {
-        kDirBottom, 
-        kDirTop, 
-        kDirRight, 
-        kDirLeft, 
-        kDirNothing
-    } };
     
     Direction FromDirection(const Board_v1& b, const Position& p) {
         if (p.row == -1) {
@@ -65,44 +61,46 @@ class Board_v1 {
             throw runtime_error("cant deduct direction from position");
         }
     }
-
-    constexpr static size_t HashBitsCount = 64;
-    // supports -1, -1 origin now
-    using Neighbors = OriginGrid<Grid<array<int8_t, 4>>>;
-    using Mirrors = OriginGrid<Grid<int8_t>>;
-
-public:    
-    using HashFunction = ZobristHashing<HashBitsCount>;
-    using HashType = typename HashFunction::value;
+    
+public:
     
     Board_v1() {}
     
     Board_v1(const vector<string>& board) : destroyed_count_(0) {
         board_size_ = board.size();
+        InitCastCandidates();
         Count expanded_size = board_size_ + 2;
-        
         Position origin = {-1, -1};
-        Size size = {expanded_size, expanded_size};
+        grid::Size size = {expanded_size, expanded_size};
         // seeting up mirrors grid
         hash_function_.reset(new HashFunction({board_size_, board_size_}, 1));
         // setting up neighbors
         mirrors_.reset(new Mirrors(origin, size));
         auto& mirs = *mirrors_;
-        for (auto row = 0; row < board_size_; ++row) {
-            for (auto col = 0; col < board_size_; ++col) {
-                mirs(row, col) = IsRightMirror(board[row][col]) ? kMirRight : kMirLeft;
-            }
-        }  
+        auto func = [&](const Position& p) {
+            mirs(p) = IsRightMirror(board[p.row][p.col]) ? kMirRight : kMirLeft;
+        };
+        Region{{0, 0}, {board_size_, board_size_}}.ForEach(func);
         // need some adjustments for sides
         for (auto i = 0; i < board_size_; ++i) {
             mirs(-1, i) = mirs(board_size_, i) 
             = mirs(i, -1) = mirs(i, board_size_) = kMirBorder;
         }
-        
         InitNeighbors();
     }
     
 private:
+
+    void InitCastCandidates() {
+        cast_candidates_.reserve(4*board_size_);
+        auto& c = cast_candidates_;
+        for (Index i = 0; i < board_size_; ++i) {
+            c.emplace_back(i, -1);
+            c.emplace_back(i, board_size_);
+            c.emplace_back(-1, i);
+            c.emplace_back(board_size_, i);
+        }
+    }
 
     void InitNeighbors() {
         neighbors_.origin() = {-1, -1};
@@ -184,6 +182,10 @@ public:
         return count;
     }
     
+    const vector<Position>& CastCandidates() const {
+        return cast_candidates_;
+    } 
+    
     void Restore() {
         history_casts_.pop_back();
         destroyed_count_ -= last_cast_.size();
@@ -209,7 +211,7 @@ public:
         return destroyed_count_ == board_size_*board_size_;
     }
     
-    const vector<Position>& HistoryCasts() const {
+    const vector<Position>& CastHistory() const {
         return history_casts_;
     }
 
@@ -316,22 +318,6 @@ private:
         neighbors_(p.row, n[kDirRight])[kDirLeft] = n[kDirLeft];
         HashOut(p);
     }
-    
-    // should initialize only once in constructor probably
-    Neighbors neighbors_;
-    // sum of history_count_
-    Count destroyed_count_;
-    HashType hash_;
-    Int board_size_;
-    
-    vector<Position> last_cast_;
-    vector<Position> history_casts_;
-    
-    // those guys are initialized when initialization done
-    // through vector of strings
-    shared_ptr<Mirrors> mirrors_;
-    // assume board_size without borders
-    shared_ptr<HashFunction> hash_function_;
     
     friend class Board_v2;
 };

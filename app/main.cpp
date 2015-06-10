@@ -26,29 +26,11 @@
 #include "board_v5.hpp"
 #include "board_v6.hpp"
 #include "optimizer.hpp"
+#include "naive_search.hpp"
 
 using namespace ant;
 
 
-vector<string> readBoard(istream& cin) {
-    int n;
-    cin >> n;
-    vector<string> str_board(n);
-    for (int i = 0; i < n; i++) {
-        cin >> str_board[i];
-    }
-    return str_board;
-}
-
-void printSolution(ostream& cout, const vector<Position>& sol) {
-    int n = 2 * sol.size();
-    cout << n << endl;
-    for (int i = 0; i < n; i++) {
-        cout << sol[i].row << endl 
-             << sol[i].col << endl;
-    }
-
-}
 
 double score(int board_sz, int cast_count) {
     return board_sz / (double) cast_count;

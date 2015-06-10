@@ -42,30 +42,6 @@ public:
     };
     
 private:
-    using Direction = char;
-    
-    const constexpr static int kDirTop      = 0;
-    const constexpr static int kDirBottom   = 1;
-    const constexpr static int kDirLeft     = 2;
-    const constexpr static int kDirRight    = 3;
-    const constexpr static int kDirNothing  = 4;
-    
-    const constexpr static char kMirRight     = 0;
-    const constexpr static char kMirLeft      = 1;
-    const constexpr static char kMirBorder    = 2;
-    const constexpr static char kMirOffset    = 3;
-    
-    const constexpr static char kOrientHor = 0;
-    const constexpr static char kOrientVer = 1;
-    
-    constexpr const static array<int, 5> kDirOpposite = { {
-        kDirBottom, 
-        kDirTop, 
-        kDirRight, 
-        kDirLeft, 
-        kDirNothing
-    } };
-    
     
     Direction FromDirection(const Board_v2& b, const Position& p) {
         if (p.row == -1) {
