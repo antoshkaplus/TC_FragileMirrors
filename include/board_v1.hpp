@@ -50,11 +50,11 @@ private:
     
     Direction FromDirection(const Board_v1& b, const Position& p) {
         if (p.row == -1) {
-            return kDirTop;
+            return kDirUp;
         } else if (p.col == -1) {
             return kDirLeft;
         } else if (p.row == b.board_size()) {
-            return kDirBottom;
+            return kDirDown;
         } else if (p.col == b.board_size()){
             return kDirRight;
         } else {
@@ -80,7 +80,7 @@ public:
         auto func = [&](const Position& p) {
             mirs(p) = IsRightMirror(board[p.row][p.col]) ? kMirRight : kMirLeft;
         };
-        Region{{0, 0}, {board_size_, board_size_}}.ForEach(func);
+        Region{{0, 0}, Size{board_size_, board_size_}}.ForEach(func);
         // need some adjustments for sides
         for (auto i = 0; i < board_size_; ++i) {
             mirs(-1, i) = mirs(board_size_, i) 
@@ -108,16 +108,16 @@ private:
         for (auto row = 0; row < board_size_; ++row) {
             for (auto col = 0; col < board_size_; ++col) {
                 auto& ns = neighbors_(row, col);
-                ns[kDirTop]     = row-1;
-                ns[kDirBottom]  = row+1;
+                ns[kDirUp]     = row-1;
+                ns[kDirDown]  = row+1;
                 ns[kDirLeft]    = col-1;
                 ns[kDirRight]   = col+1;
                 HashIn(row, col);
             }
         }  
         for (auto i = 0; i < board_size_; ++i) {
-            neighbors_(-1, i)[kDirBottom] = 0;
-            neighbors_(board_size_, i)[kDirTop] = board_size_-1;
+            neighbors_(-1, i)[kDirDown] = 0;
+            neighbors_(board_size_, i)[kDirUp] = board_size_-1;
             neighbors_(i, board_size_)[kDirLeft] = board_size_-1;
             neighbors_(i, -1)[kDirRight] = 0;
         }
@@ -222,7 +222,7 @@ public:
     Count EmptyLinesCount() const {
         Count count = 0;
         for (int i = 0; i < board_size_; ++i) {
-            if (neighbors_(-1, i)[kDirBottom] == board_size_) ++count;
+            if (neighbors_(-1, i)[kDirDown] == board_size_) ++count;
             if (neighbors_(i, -1)[kDirRight] == board_size_) ++count;
         }
         return count;
@@ -247,7 +247,7 @@ public:
     }
      
     bool IsEmptyCross(const Position& p) const {
-        return neighbors_(-1, p.col)[kDirBottom] == board_size_ 
+        return neighbors_(-1, p.col)[kDirDown] == board_size_ 
         && neighbors_(p.row, -1)[kDirRight] == board_size_;
     }
 
@@ -262,19 +262,19 @@ private:
         switch (mirs[p]) {
             case kMirRight: {
                 switch (dir) {
-                    case kDirTop:       return P{{p.row, ns[kDirRight]}, kDirLeft} ;    
-                    case kDirBottom:    return P{{p.row, ns[kDirLeft]}, kDirRight};     
-                    case kDirLeft:      return P{{ns[kDirBottom], p.col}, kDirTop};   
-                    case kDirRight:     return P{{ns[kDirTop], p.col}, kDirBottom};  
+                    case kDirUp:       return P{{p.row, ns[kDirRight]}, kDirLeft} ;    
+                    case kDirDown:    return P{{p.row, ns[kDirLeft]}, kDirRight};     
+                    case kDirLeft:      return P{{ns[kDirDown], p.col}, kDirUp};   
+                    case kDirRight:     return P{{ns[kDirUp], p.col}, kDirDown};  
                     default: assert(false);    
                 }
             }
             case kMirLeft: {
                 switch (dir) {
-                    case kDirTop:       return P{{p.row, ns[kDirLeft]}, kDirRight} ;    
-                    case kDirBottom:    return P{{p.row, ns[kDirRight]}, kDirLeft};     
-                    case kDirLeft:      return P{{ns[kDirTop], p.col}, kDirBottom};   
-                    case kDirRight:     return P{{ns[kDirBottom], p.col}, kDirTop};  
+                    case kDirUp:       return P{{p.row, ns[kDirLeft]}, kDirRight} ;    
+                    case kDirDown:    return P{{p.row, ns[kDirRight]}, kDirLeft};     
+                    case kDirLeft:      return P{{ns[kDirUp], p.col}, kDirDown};   
+                    case kDirRight:     return P{{ns[kDirDown], p.col}, kDirUp};  
                     default: assert(false); 
                 }
             }
@@ -285,8 +285,8 @@ private:
                     case kDirLeft:
                         return P{{p.row, ns[kDirOpposite[d = dir]]}, dir};
                         break;
-                    case kDirTop:
-                    case kDirBottom:
+                    case kDirUp:
+                    case kDirDown:
                         return P{{ns[kDirOpposite[d = dir]], p.col}, dir};
                         break;
                     default: assert(false);
@@ -303,8 +303,8 @@ private:
     
     void Restore(const Position& p) {
         auto& n = neighbors_(p);
-        neighbors_(n[kDirTop], p.col)[kDirBottom] = p.row;
-        neighbors_(n[kDirBottom], p.col)[kDirTop] = p.row;
+        neighbors_(n[kDirUp], p.col)[kDirDown] = p.row;
+        neighbors_(n[kDirDown], p.col)[kDirUp] = p.row;
         neighbors_(p.row, n[kDirLeft])[kDirRight] = p.col;
         neighbors_(p.row, n[kDirRight])[kDirLeft] = p.col;
         HashIn(p);
@@ -312,8 +312,8 @@ private:
      
     void Destroy(const Position& p) {
         auto& n = neighbors_(p);
-        neighbors_(n[kDirTop], p.col)[kDirBottom] = n[kDirBottom];
-        neighbors_(n[kDirBottom], p.col)[kDirTop] = n[kDirTop];
+        neighbors_(n[kDirUp], p.col)[kDirDown] = n[kDirDown];
+        neighbors_(n[kDirDown], p.col)[kDirUp] = n[kDirUp];
         neighbors_(p.row, n[kDirLeft])[kDirRight] = n[kDirRight];
         neighbors_(p.row, n[kDirRight])[kDirLeft] = n[kDirLeft];
         HashOut(p);

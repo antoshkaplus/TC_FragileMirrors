@@ -4,6 +4,13 @@
 temp_dir = "./../temp/"
 executable = "./../bin/solver"
 
+# make sure temp directory exists
+import os
+
+if not os.path.isdir(temp_dir):
+    os.makedirs(temp_dir)
+
+
 input_name = temp_dir + "input.txt"
 output_name = temp_dir + "output.txt"
 
@@ -27,5 +34,3 @@ s = output.read()
 print s
 sys.stdout.flush()
 output.close()
-
-

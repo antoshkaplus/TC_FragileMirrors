@@ -26,7 +26,7 @@ endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 
 file(GLOB SOURCE_FILES "./src/*.cpp")
-file(GLOB HEADER_FILES "./include/*.h" "./include/*.hpp")	
+file(GLOB HEADER_FILES "./include/*.h" "./include/*.hpp")
 
 include_directories("./include")
 include_directories("/usr/local/include")
@@ -34,7 +34,7 @@ include_directories("/usr/include")
 
 find_library(ANT_LIBRARY ant)
 
-add_library(fragmir ${SOURCE_FILES} ${HEADER_FILES}) 
+add_library(fragmir ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(fragmir ${ANT_LIBRARY})
 
 add_executable(solver "app/solver.cpp")
@@ -43,6 +43,12 @@ target_link_libraries(solver fragmir)
 add_executable(tester "app/tester.cpp")
 target_link_libraries(tester fragmir)
 
+# solution from other people
+add_executable(colun "app/main_template.cpp" "others/colun.cpp")
+target_link_libraries(colun fragmir)
 
+add_executable(chokudai "app/main_template.cpp" "others/chokudai.cpp")
+target_link_libraries(chokudai fragmir)
 
-
+add_executable(psyho "app/main_template.cpp" "others/psyho.cpp")
+target_link_libraries(psyho fragmir)

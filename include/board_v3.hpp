@@ -18,7 +18,6 @@
 #include <tuple>
 
 #include <ant/core/core.hpp>
-#include <ant/grid.h>
 
 #include "util.hpp"
 #include "board.hpp"

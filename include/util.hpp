@@ -22,7 +22,7 @@
 #include <fstream>
 
 
-#include "ant/grid.h"
+#include "ant/grid.hpp"
 
 using namespace std;
 using namespace ant;
@@ -34,6 +34,7 @@ extern default_random_engine RNG;
 vector<string> GenerateStringBoard(int sz);
 vector<string> ReadBoard(istream& cin);
 void PrintSolution(ostream& cout, const vector<Position>& sol);
+void PrintSolution(ostream& cout, const vector<int>& sol);
 
 constexpr bool IsRightMirror(char mirror) {
     return mirror == 'R'; // '\'
@@ -96,29 +97,12 @@ struct CastNode {
     shared_ptr<CastNode> previous;
 };
 
-using Direction = char;
-
-const constexpr int kDirTop      = 0;
-const constexpr int kDirBottom   = 1;
-const constexpr int kDirLeft     = 2;
-const constexpr int kDirRight    = 3;
-const constexpr int kDirNothing  = 4;
-
 const constexpr char kMirRight     = 0;
 const constexpr char kMirLeft      = 1;
 const constexpr char kMirBorder    = 2;
 
 const constexpr char kOrientHor = 0;
 const constexpr char kOrientVer = 1;
-
-constexpr const array<int, 5> kDirOpposite = { {
-    kDirBottom, 
-    kDirTop, 
-    kDirRight, 
-    kDirLeft, 
-    kDirNothing
-} };
-
 
 
 

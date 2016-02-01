@@ -10,7 +10,6 @@
 #define __FragileMirrors__board__
 
 #include <ant/core/core.hpp>
-#include <ant/grid.h>
 
 #include "util.hpp"
 

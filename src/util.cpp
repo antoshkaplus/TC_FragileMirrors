@@ -47,6 +47,14 @@ void PrintSolution(ostream& cout, const vector<Position>& sol) {
     for (int i = 0; i < n; i++) {
         cout << sol[i].row << endl 
         << sol[i].col << endl;
-    }
-    
+    }    
 }
+
+void PrintSolution(ostream& cout, const vector<int>& sol) {
+    int n = sol.size() / 2;
+    cout << n << endl;
+    for (auto i : sol) {
+        cout << i << endl;
+    }
+}
+
