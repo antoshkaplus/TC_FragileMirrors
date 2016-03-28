@@ -4,3 +4,5 @@ build*
 bin
 lib
 temp
+Makefile
+*.cmake
