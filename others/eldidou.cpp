@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 Anton Logunov. All rights reserved.
 //
 
-#include "eldidou.hpp"
+//#include "eldidou.hpp"
 
 
 #ifdef __amd64
@@ -26,6 +26,8 @@
 #include <limits>
 #include <queue>
 #include <set>
+
+#include "fragile_mirrors.hpp"
 
 namespace eldidou {
 
@@ -992,3 +994,11 @@ vector<int> FragileMirrors::destroy(vector<string> board)
 }
 
 }
+
+std::vector<int> FragileMirrors::destroy(const std::vector<std::string> & board) {
+    eldidou::FragileMirrors fm;
+    return fm.destroy(board);
+}
+
+
+

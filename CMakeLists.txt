@@ -1,5 +1,6 @@
 # cmake -DCMAKE_BUILD_TYPE=Debug
 # cmake -DCMAKE_BUILD_TYPE=Release
+# make
 
 cmake_minimum_required (VERSION 3.2)
 project (FragileMirrors)
@@ -37,13 +38,14 @@ find_library(ANT_LIBRARY ant)
 add_library(fragmir ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(fragmir ${ANT_LIBRARY})
 
-add_executable(solver "app/solver.cpp")
+add_executable(solver "app/main_template.cpp" "app/solver.cpp")
 target_link_libraries(solver fragmir)
 
 add_executable(tester "app/tester.cpp")
 target_link_libraries(tester fragmir)
 
 # solution from other people
+# need fragmir for helper functions
 add_executable(colun "app/main_template.cpp" "others/colun.cpp")
 target_link_libraries(colun fragmir)
 
@@ -52,3 +54,6 @@ target_link_libraries(chokudai fragmir)
 
 add_executable(psyho "app/main_template.cpp" "others/psyho.cpp")
 target_link_libraries(psyho fragmir)
+
+add_executable(eldidou "app/main_template.cpp" "others/eldidou.cpp")
+target_link_libraries(eldidou fragmir)

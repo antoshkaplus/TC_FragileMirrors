@@ -7,7 +7,6 @@
 //
 
 
-#include "chokudai.hpp"
 #include <cmath>
 #include <algorithm>
 #include <cstdio>
@@ -20,8 +19,38 @@
 #include <set>
 #include <map>
 
+#include "fragile_mirrors.hpp"
+
 namespace chokudai {
-    using namespace std;
+
+using namespace std;
+
+
+#define NMAX 128
+#define NSHIFT 7
+#define COUNTMAX 16000000
+
+#define hashmax (1 << 24)
+
+class FragileMirrors {
+public:
+    vector<int> destroy(vector<string> board);
+    vector<int> makeret();
+    int getscore(int turn);
+    void init(vector<string> b);
+    void erase(int a, int b);
+    void back();
+    void inputerase(int a, int b, int num);
+    void inputback();
+    void lighterase(int a, int b);
+    void lightback();
+    
+    int turnscore[200];
+    int prenokori2[10000];
+    long long prehash[10000];
+    int starterase[NMAX][4];
+};
+
 
 #define TIME 9500
 #define ll long long
@@ -697,3 +726,10 @@ void FragileMirrors::lightback()
 }
 
 }
+
+std::vector<int> FragileMirrors::destroy(const std::vector<std::string> & board) {
+    chokudai::FragileMirrors fm;
+    return fm.destroy(board);
+}
+
+

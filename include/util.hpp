@@ -35,6 +35,7 @@ vector<string> GenerateStringBoard(int sz);
 vector<string> ReadBoard(istream& cin);
 void PrintSolution(ostream& cout, const vector<Position>& sol);
 void PrintSolution(ostream& cout, const vector<int>& sol);
+std::vector<int> ToSolution(const std::vector<Position>& ps);
 
 constexpr bool IsRightMirror(char mirror) {
     return mirror == 'R'; // '\'

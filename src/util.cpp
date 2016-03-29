@@ -44,17 +44,26 @@ vector<string> ReadBoard(istream& cin) {
 void PrintSolution(ostream& cout, const vector<Position>& sol) {
     int n = 2 * sol.size();
     cout << n << endl;
-    for (int i = 0; i < n; i++) {
-        cout << sol[i].row << endl 
-        << sol[i].col << endl;
+    for (auto& p : sol) {
+        cout << p.row << endl 
+        << p.col << endl;
     }    
 }
 
 void PrintSolution(ostream& cout, const vector<int>& sol) {
-    int n = sol.size() / 2;
-    cout << n << endl;
+    cout << sol.size() << endl;
     for (auto i : sol) {
         cout << i << endl;
     }
+}
+
+std::vector<int> ToSolution(const std::vector<Position>& ps) {
+    vector<int> res;
+    res.reserve(2*ps.size());
+    for (auto& p : ps) {
+        res.push_back(p.row);
+        res.push_back(p.col);
+    }
+    return res;
 }
 
