@@ -17,3 +17,6 @@ TODO:
 - increase at the end
 
 - way to compare results with each other
+
+"scores" folder is for all the solutions,
+have to keep it to not run all the solutions every time.
