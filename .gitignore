@@ -6,3 +6,5 @@ lib
 temp
 Makefile
 *.cmake
+CMakeCache.txt
+CMakeFiles
