@@ -5,7 +5,7 @@
 cmake_minimum_required (VERSION 3.2)
 project (FragileMirrors)
 
-list(APPEND CMAKE_CXX_FLAGS " -std=c++1z -Werror -Wall ")
+list(APPEND CMAKE_CXX_FLAGS " -std=c++1z -Werror -Wall -Wno-error=char-subscripts -Wno-char-subscripts")
 
 set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} ")
 set(CMAKE_CXX_FLAGS_RELEASE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 ")
