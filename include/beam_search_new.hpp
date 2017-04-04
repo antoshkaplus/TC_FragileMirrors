@@ -1,22 +1,27 @@
 //
 // Created by Anton Logunov on 4/1/17.
 //
-
 #pragma once
 
+#include "util.hpp"
+#include "board_v1.hpp"
+#include "score.hpp"
 
 
-
+using BoardType = Board_v1;
+using HashType = Board_v1::HashType;
+using Score = Score_v1<Board_v1>;
+using Board = Score_v1;
 
 
 struct Derivative {
-    shared_ptr<const Board> board;
+    shared_ptr<const BoardType> board;
     Position cast;
     double score;
-    Board::HashType hash;
+    HashType hash;
 
     Derivative() {}
-    Derivative(shared_ptr<const Board> board, Position cast, double score, Board::HashType hash)
+    Derivative(shared_ptr<const BoardType> board, Position cast, double score, HashType hash)
             : board(board), cast(cast), score(score), hash(hash) {}
 
     bool operator<(const Derivative& s) const {
@@ -25,9 +30,12 @@ struct Derivative {
 };
 
 
+// it's a little bit different
 struct LevelDerivatives {
 
     vector<Derivative> ExtractPromotion();
+
+    double Potential(BoardType& cur_sol_level_board);
 
     void Insert(Derivative);
 
@@ -37,12 +45,7 @@ struct LevelDerivatives {
 
 // many things are probably better off implemented outside
 
-template<class Board, class Score>
 class BeamSearchNew {
-
-    using HashType = typename Board::HashType;
-    using CastType = typename Board::CastType;
-
     /// can make use of more parametered possibly
 
 
