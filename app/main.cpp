@@ -15,7 +15,6 @@
 #include "beam_search.hpp"
 #include "board_v1.hpp"
 #include "board_v2.hpp"
-#include "FragileMirrors.hpp"
 #include "util.hpp"
 #include "board_test.hpp"
 #include "stats.hpp"

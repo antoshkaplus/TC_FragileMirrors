@@ -268,7 +268,7 @@ using pr_queue = priority_queue<Board, vector<Board>, Comp>;
 //            score -= (board.rowMirrorsLeft(i) == 3) + (board.colMirrorsLeft(i) == 3);
 //            score -= (board.rowMirrorsLeft(i) == 5) + (board.colMirrorsLeft(i) == 5);
 //        }
-//        return 1/score; 
+//        return 1/score;
 //    }
 //    
 //    // going to solve minimization problem

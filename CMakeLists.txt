@@ -5,7 +5,7 @@
 cmake_minimum_required (VERSION 3.2)
 project (FragileMirrors)
 
-list(APPEND CMAKE_CXX_FLAGS " -std=c++1y -Werror -Wall ")
+list(APPEND CMAKE_CXX_FLAGS " -std=c++1z -Werror -Wall ")
 
 set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} ")
 set(CMAKE_CXX_FLAGS_RELEASE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 ")
@@ -41,6 +41,7 @@ target_link_libraries(fragmir ${ANT_LIBRARY})
 add_executable(solver "app/main_template.cpp" "app/solver.cpp")
 target_link_libraries(solver fragmir)
 
+# quick run to see result of the change
 add_executable(tester "app/tester.cpp")
 target_link_libraries(tester fragmir)
 
@@ -57,3 +58,9 @@ target_link_libraries(psyho fragmir)
 
 add_executable(eldidou "app/main_template.cpp" "others/eldidou.cpp")
 target_link_libraries(eldidou fragmir)
+
+# tests
+file(GLOB_RECURSE TEST_SOURCE_FILES "test/*.cpp")
+
+add_executable(unittest ${TEST_SOURCE_FILES} test/board.cpp)
+target_link_libraries(unittest fragmir gtest)

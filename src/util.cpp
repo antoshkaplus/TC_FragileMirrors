@@ -67,3 +67,17 @@ std::vector<int> ToSolution(const std::vector<Position>& ps) {
     return res;
 }
 
+void PrintStringBoard(const vector<string>& b) {
+    for (int i = 0; i < b.size(); i++) {
+        cout << b[i] << endl;
+    }
+    cout << endl;
+}
+
+StrBoard ConvertToLetterMirrors(StrBoard b) {
+    auto func = [&](Position p) {
+        b[p.row][p.col] = (b[p.row][p.col] == '/') ? 'L' : 'R';
+    };
+    Region(0, 0, b.size(), b.size()).ForEach(func);
+    return b;
+}

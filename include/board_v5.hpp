@@ -265,7 +265,6 @@ public:
         empty_space_ += count;
         filled_space_ -= count;
         mirrors_destroyed_ += count;
-        
     }
     
     void Restore() {
@@ -304,9 +303,11 @@ public:
     
     void Restore(char row, char col) {
         if (++mirrors_left_[kOrientHor][col] == 1) {
+            assert(empty_lines_count_ != 0);
             --empty_lines_count_;
         }         
         if (++mirrors_left_[kOrientVer][row] == 1) {
+            assert(empty_lines_count_ != 0);
             --empty_lines_count_;
         } 
         HashIn({row, col});

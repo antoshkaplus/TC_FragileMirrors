@@ -12,12 +12,18 @@
 //
 
 
-#ifndef FRAGILE_MIRRORS_stats_hpp
-#define FRAGILE_MIRRORS_stats_hpp
+#pragma once
 
+#include <functional>
+
+#include "beam_search_history.hpp"
 #include "beam_search.hpp"
+#include "board_v1.hpp"
+#include "score.hpp"
 #include "board.hpp"
 #include "util.hpp"
+
+using namespace std::placeholders;
 
 template<class Board, size_t beam_width = 2000>
 class Stats {
@@ -77,6 +83,21 @@ private:
 
 vector<double> ReadDestroyedCoeffs(istream& in); 
 
+// score diff between best and max
 
-
-#endif
+// we need to have some place to write it down
+void LevelScoreDiff(BeamSearchHistory<Board_v1, Score_v1<Board_v1>>& bs_history, Board_v1 orig_board, Board_v1& sol) {
+    auto& levels = bs_history.beam_levels();
+    auto& casts = sol.CastHistory();
+    for (auto i = 0; i < casts.size(); ++i) {
+        auto& beam = levels[i];
+        auto fn = std::bind(&BeamSearchHistory<Board_v1, Score_v1<Board_v1>>::score, bs_history, _1);
+        auto max_board = MaxElement(beam.begin(), beam.end(), fn);
+        auto min_board = MinElement(beam.begin(), beam.end(), fn);
+        auto max_score = bs_history.score(*max_board);
+        auto min_score = bs_history.score(*min_board);
+        auto best_score = bs_history.score(orig_board);
+        cout << max_score << " " << best_score << " " << min_score << endl;
+        orig_board.Cast(casts[i]);
+    }
+};

@@ -39,7 +39,7 @@ struct Greedy {
     };
     
     
-    // need to pass in score function 
+    // need to pass in score function
     using Func = function<double(const Board& b)>;
     Board Destroy(const Board& b, const Func& func) {
         Board board = b;

@@ -22,12 +22,13 @@
 #include <fstream>
 
 
-#include "ant/grid.hpp"
+#include "ant/grid/grid.hpp"
 
 using namespace std;
 using namespace ant;
 using namespace ant::grid;
 
+using StrBoard = vector<string>;
 
 extern default_random_engine RNG;
 
@@ -36,6 +37,27 @@ vector<string> ReadBoard(istream& cin);
 void PrintSolution(ostream& cout, const vector<Position>& sol);
 void PrintSolution(ostream& cout, const vector<int>& sol);
 std::vector<int> ToSolution(const std::vector<Position>& ps);
+void PrintStringBoard(const vector<string>& b);
+StrBoard ConvertToLetterMirrors(StrBoard b);
+
+template<class V>
+struct ResultSuccess {
+    V result;
+    bool success;
+
+    ResultSuccess() : success(false) {}
+};
+
+template<class Board>
+void PrintMirrors(const Board& b) {
+    auto ms = b.mirrors();
+    auto func = [&](Position p) {
+        cout << (int)ms[p];
+        if (p.col == b.size()-1) cout << endl;
+    };
+
+    Region(0, 0, b.size(), b.size()).ForEach(func);
+}
 
 constexpr bool IsRightMirror(char mirror) {
     return mirror == 'R'; // '\'
@@ -104,7 +126,6 @@ const constexpr char kMirBorder    = 2;
 
 const constexpr char kOrientHor = 0;
 const constexpr char kOrientVer = 1;
-
 
 
 

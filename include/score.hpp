@@ -15,7 +15,7 @@
 
 using namespace std;
 
-
+// better call functor for clarity
 template <class Board>
 class Score {
 public:
@@ -28,14 +28,23 @@ extern const array<double, 51> EMPTY_LINES_PARAM;
 
 template <class Board>
 class Score_v1 {
-    Count N;
 
 public:
-    Score_v1(Count N) : N(N) {}
 
     double operator()(const Board& b) const {
-        return b.MirrorsDestroyed() + EMPTY_LINES_PARAM[N-50] * b.EmptyLinesCount();
+        return b.MirrorsDestroyed() + EMPTY_LINES_PARAM[b.size()-50] * b.EmptyLinesCount();
     }
+};
+
+template <class Board>
+class InterLevelScoreFunctor {
+
+public:
+    double operator()(const Board& b) const {
+        // may need to take into account something else
+        return Score_v1<Board>()(b)/b.CastCount();
+    }
+
 };
 
 
