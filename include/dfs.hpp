@@ -8,13 +8,14 @@
 
 #include "util.hpp"
 
-#include "board_v1.hpp"
+#include "board_v1_impl_1.hpp"
+#include "cast_history.hpp"
 #include "score.hpp"
 
 
 class DFS {
-    using Board = Board_v1;
-    using Score = InterLevelScoreFunctor<Board>;
+    using Board = Board_v1_Impl_1<CastHistory_Nodes>;
+    using Score = InterLevelScoreFunctor;
 
 
     struct State {

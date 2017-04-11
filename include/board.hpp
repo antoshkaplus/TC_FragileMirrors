@@ -15,41 +15,73 @@
 
 class Board {
 public:
+    using HashType = bitset<64>;
 
-    virtual Count Cast(const Position& p) = 0;
-    Count MirrorsLeft() const {
-        return (Count)(Size()*Size() - MirrorsDestroyed());
+    virtual HashType hash() const = 0;
+    virtual Count MirrorsLeft() const {
+        return (Count)(size()* size() - MirrorsDestroyed());
     }
     virtual Count MirrorsDestroyed() const = 0;
-    virtual bool IsDestroyed(Index row, Index col) const = 0;
-    virtual Count Size() const = 0;
-    virtual Count RowMirrorsLeft(Index row) const = 0;
-    virtual Count ColMirrorsLeft(Index col) const = 0;
-    
-    virtual Count EmptyRowCount() const = 0;    
-    virtual Count EmptyColCount() const = 0;
-    
-    virtual bool IsRowEmpty(Index row) const {
-        return RowMirrorsLeft(row) == 0;
-    }
-    virtual bool IsColEmpty(Index col) const {
-        return ColMirrorsLeft(col) == 0;
-    }
-    virtual Count EmptyLinesCount() const {
-        return EmptyColCount() + EmptyRowCount();
-    }
-    
+    virtual Count size() const = 0;
+
+    virtual Count EmptyLinesCount() const = 0;
+
     virtual Count CastCount() const = 0;
-    
+
+    virtual vector<Position> CastHistory() const = 0;
+
+    virtual bool AllDestroyed() const {
+        return MirrorsLeft() == 0;
+    }
+
+    virtual unique_ptr<Board> Clone() const = 0;
+
     virtual ~Board() {}
 };
 
-ostream& operator<<(ostream& output, const Board& board);
+
+// Restore works only once after cast
+class Board_v1 : public Board {
+public:
+    using CastType = Position;
+
+    virtual bool IsLineEmpty(Position p) const = 0;
+    virtual Count Cast(const Position& p) = 0;
+    virtual void Restore() = 0;
+    virtual const vector<Position>& CastCandidates() const = 0;
+
+    template<class Functor>
+    void ForEachAppliedCast(Functor func) {
+        for (auto& p : CastCandidates()) {
+            Cast(p);
+            func(p);
+            Restore();
+        }
+    }
+
+    virtual ~Board_v1() {}
+};
 
 
+class Board_v2 : public Board {
+public:
+    using CastType = short ;
 
+    virtual Count Cast(short ray_index) = 0;
+    virtual void Restore() = 0;
+    virtual Count CastRestorable(short ray_index) = 0;
+    virtual Count RayCount() const = 0;
 
+    template<class Functor>
+    void ForEachAppliedCast(Functor func) {
+        for (auto i = 0; i < RayCount(); ++i) {
+            CastRestorable(i);
+            func(i);
+            Restore();
+        }
+    }
 
-
+    virtual ~Board_v2() {}
+};
 
 

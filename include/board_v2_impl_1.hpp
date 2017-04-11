@@ -9,16 +9,17 @@
 #ifndef FRAGILE_MIRRORS_board_v4_hpp
 #define FRAGILE_MIRRORS_board_v4_hpp
 
-#include "util.hpp"
+#include "board_common.hpp"
 
 using namespace std;
 
-class Board_v4 {
+// space optimization
+// ray indexes are used
+template <class CastHistoryType>
+class Board_v2_Impl_1 : public Board_v2 {
 private:
     
     using int8_t = short;
-    
-    constexpr static size_t HashBitsCount = 64;
     
     const constexpr static int kDirTop      = 0;
     const constexpr static int kDirBottom   = 1;
@@ -38,10 +39,6 @@ private:
     using Mirror = char;
     using Neighbors = std::array<short, 4>;
 
-    using HashFunction = ant::grid::ZobristHashing<HashBitsCount>;
-public:
-    using HashType = typename HashFunction::value;
-
 private:
     // divide this dude on multiple dudes
     // Neighbors
@@ -52,14 +49,14 @@ private:
     // 
 
     // probably can place deleted and 
-    // __declspec(align(16))
-    struct Item  {
+
+    struct  Item  {
         Neighbors neighbors;
         int8_t row;
         int8_t col;
         char mirror;
         bool destroyed;
-    }; 
+    };
 
     struct Ray {
         Ray(short pos, Direction dir) 
@@ -69,73 +66,44 @@ private:
         Direction dir; 
     };    
     
-    constexpr const static array<int, 5> kDirOpposite = { {
-        kDirBottom, 
-        kDirTop, 
-        kDirRight, 
-        kDirLeft, 
-        kDirNothing
-    } };
+    constexpr static array<int, 5> kDirOpposite= { {
+           kDirBottom,
+           kDirTop,
+           kDirRight,
+           kDirLeft,
+           kDirNothing
+   } };
 
     // first index mirror type
     // second index where ray going
     // result direction where will go  
-    constexpr const static array<array<char, 4>, 2> kDirReflection = { {
-        // kMirRight
-        { {
-            kDirLeft,  // to top
-            kDirRight,   // to bottom
-            kDirTop, // to left
-            kDirBottom     // to right
-        } },
-        // kMirLeft
-        { {
-            kDirRight,   // to top
-            kDirLeft,  // to bottom
-            kDirBottom,    // to left
-            kDirTop  // to right
-        } }
+    constexpr static array<array<char, 4>, 2> kDirReflection =  { {
+          // kMirRight
+          { {
+                    kDirLeft,  // to top
+                    kDirRight,   // to bottom
+                    kDirTop, // to left
+                    kDirBottom     // to right
+          } },
+          // kMirLeft
+          { {
+                    kDirRight,   // to top
+                    kDirLeft,  // to bottom
+                    kDirBottom,    // to left
+                    kDirTop  // to right
+          } }
     } };
     
-    
-    
-    vector<Item> items_;
-    // they are first in items
-    // where is ray directed
-    vector<Direction> ray_direction_;
-    
-    array<vector<char>, 2> mirrors_left_; 
-    Count empty_lines_count_;
-    Count even_mirrors_lines_;
-    
-    Count board_size_;
-    // can make use of cast node actually
-    // vector<>
-    
-    Count filled_space_;
-    Count empty_space_;
-    
-    Count mirrors_destroyed_;
-    
-    shared_ptr<CastNode> history_casts_;
-    
-    shared_ptr<HashFunction> hash_function_;
-    HashType hash_;
-    
-    // hash function
-    
-    shared_ptr<vector<short>> restorable_buffer_;
-    shared_ptr<vector<short>> reduce_buffer_;
-          
+
 public:
     
-    Board_v4() {}
+    Board_v2_Impl_1() {}
     
-    Board_v4(const vector<string>& str_board) {
+    Board_v2_Impl_1(const vector<string>& str_board) : board_size_(str_board.size()),
+                                                       board_hash_(board_size_) {
         filled_space_ = str_board.size()*str_board.size();
         empty_space_ = 0;
-        
-        board_size_ = str_board.size();
+
         mirrors_destroyed_ = 0;
         even_mirrors_lines_ = 2 * board_size_ * (board_size_ % 2 == 0 ? 1 : 0);
         empty_lines_count_ = 0;
@@ -146,7 +114,6 @@ public:
         items_.resize(4*board_size_ + board_size_*board_size_);
         ray_direction_.resize(4*board_size_);
         
-        hash_function_.reset(new HashFunction({board_size_, board_size_}, 1));
         restorable_buffer_.reset(new vector<short>());
         reduce_buffer_.reset(new vector<short>());
         
@@ -167,7 +134,7 @@ public:
                 t.mirror = IsRightMirror(str_board[r][c]) ? kMirRight : kMirLeft;
                 t.row = r;
                 t.col = c;
-                HashIn(r, c);
+                board_hash_.HashIn(r, c);
             }
         }
         // initializing border links
@@ -228,7 +195,7 @@ public:
     }
     
     
-    Count CastRestorable(short ray_index) {
+    Count CastRestorable(short ray_index) override {
         auto& last = *restorable_buffer_; 
         
         Ray ray{ray_index, ray_direction_[ray_index]};
@@ -248,11 +215,10 @@ public:
         return last.size();
     }
     
-    void Cast(short ray_index) {
+    Count Cast(short ray_index) override {
         auto& ray_item = items_[ray_index];
-        shared_ptr<CastNode> new_node(new CastNode({ray_item.row, ray_item.col}, history_casts_));
-        history_casts_ = new_node;
-        
+        history_casts_.Push({ray_item.row, ray_item.col});
+
         Ray ray = NextFromBorder(ray_index);
         Count count = 0;
         while (ray.pos >= ray_direction_.size()) {
@@ -265,10 +231,14 @@ public:
         empty_space_ += count;
         filled_space_ -= count;
         mirrors_destroyed_ += count;
-
+        return count;
     }
-    
-    void Restore() {
+
+    Count CastCount() const override {
+        return history_casts_.Count();
+    }
+
+    void Restore() override {
         auto& last = *restorable_buffer_; 
         
         mirrors_destroyed_ -= last.size();
@@ -297,7 +267,7 @@ public:
         } else {
             --even_mirrors_lines_;
         }*/
-        HashOut({row, col});
+        board_hash_.HashOut({row, col});
     }
     
     void DestroyLinks(short index) {
@@ -324,7 +294,7 @@ public:
         } else {
             --even_mirrors_lines_;
         }*/
-        HashIn({row, col});
+        board_hash_.HashIn({row, col});
     }
     
     bool IsEmptyLine(short ray_index) {
@@ -386,23 +356,23 @@ public:
         filled_space_ = items_.size() - ray_direction_.size();
     }
     
-    bool AllDestroyed() const {
+    bool AllDestroyed() const override {
         return empty_lines_count_ == 2 * board_size_;
     }
     
-    Count size() const {
+    Count size() const override {
         return board_size_;
     }
     
-    Count RayCount() const {
+    Count RayCount() const override {
         return ray_direction_.size();
     }
     
-    Count MirrorsDestroyed() const {
+    Count MirrorsDestroyed() const override {
         return mirrors_destroyed_;
     }
     
-    Count EmptyLinesCount() const {
+    Count EmptyLinesCount() const override {
         return empty_lines_count_;
     }
 
@@ -410,8 +380,8 @@ public:
         return even_mirrors_lines_;
     }
 
-    HashType hash() const {
-        return hash_;
+    BoardHash::HashType hash() const override {
+        return board_hash_.hash();
     }
     
     Count EmptySpace() const {
@@ -422,29 +392,16 @@ public:
         return filled_space_;
     }
 
-    shared_ptr<CastNode> CastHistory() const {
-        return history_casts_;
+    vector<Position> CastHistory() const override {
+        return ToVector(history_casts_);
     }
 
-private: 
-    
-    void HashIn(char row, char col) {
-        HashIn({row, col});
+    unique_ptr<Board> Clone() const override {
+        return move(make_unique<Board_v2_Impl_1>(*this));
     }
-    
-    void HashOut(char row, char col) {
-        HashOut({row, col});
-    }
-    
-    void HashIn(const Position& p) {
-        hash_function_->xorNothing(&hash_); // xor out 
-        hash_function_->xorState(&hash_, p, 0);
-    }
-    
-    void HashOut(const Position& p) {
-        hash_function_->xorState(&hash_, p, 0); // xor out
-        hash_function_->xorNothing(&hash_); // xor in
-    }
+
+
+private:
 
     Ray NextFromMirror(const Ray& ray) const {
         Direction dir = kDirReflection[items_[ray.pos].mirror][ray.dir];
@@ -486,8 +443,38 @@ private:
         }
     }
 
+    vector<Item> items_;
+    // they are first in items
+    // where is ray directed
+    vector<Direction> ray_direction_;
+
+    array<vector<char>, 2> mirrors_left_;
+    Count empty_lines_count_;
+    Count even_mirrors_lines_;
+
+    Count board_size_;
+    // can make use of cast node actually
+    // vector<>
+
+    Count filled_space_;
+    Count empty_space_;
+
+    Count mirrors_destroyed_;
+
+    CastHistoryType history_casts_;
+
+    BoardHash board_hash_;
+
+    // hash function
+
+    shared_ptr<vector<short>> restorable_buffer_;
+    shared_ptr<vector<short>> reduce_buffer_;
 
 };
 
+template<class T>
+constexpr array<int, 5> Board_v2_Impl_1<T>::kDirOpposite;
+template<class T>
+constexpr array<array<char, 4>, 2> Board_v2_Impl_1<T>::kDirReflection;
 
 #endif

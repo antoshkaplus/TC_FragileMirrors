@@ -4,7 +4,15 @@
 
 #include "gtest/gtest.h"
 
-#include "board_v1.hpp"
+#include "board_v1_impl_1.hpp"
+#include "board_v2_impl_1.hpp"
+#include "board_v5.hpp"
+#include "board_v6.hpp"
+#include "cast_history.hpp"
+#include "naive_search.hpp"
+#include "beam_search.hpp"
+#include "score.hpp"
+
 
 using StrBoard = vector<string>;
 
@@ -20,9 +28,9 @@ vector<StrBoard> ReadStrBoards(const string& path) {
 class BoardTest : public ::testing::Test {
 protected:
 
-    Board_v1 b_1;
-    Board_v1 b_2;
-    Board_v1 b_3;
+    Board_v1_Impl_1<CastHistory_Nodes> b_1;
+    Board_v1_Impl_1<CastHistory_Nodes> b_2;
+    Board_v1_Impl_1<CastHistory_Nodes> b_3;
 
     virtual void SetUp() {
         auto bs = ReadStrBoards("./../data/test/board_sample.txt");
@@ -33,7 +41,6 @@ protected:
     }
 
 };
-
 
 
 TEST_F(BoardTest, Cast) {
@@ -95,3 +102,74 @@ TEST_F(BoardTest, CastEmptyLines_Horizontal) {
 
     ASSERT_EQ(4, b_1.MirrorsDestroyed());
 }
+
+
+class SearchTest : public ::testing::Test {
+protected:
+
+    using B_1 = Board_v2_Impl_1<CastHistory_Nodes>;
+    using B_2 = Board_v2_Impl_1<CastHistory_Vector>;
+    using B_3 = Board_v5;
+    using B_4 = Board_v6;
+
+    B_1 b_1;
+    B_2 b_2;
+    B_3 b_3;
+    B_4 b_4;
+
+    array<Board*, 4> bs;
+
+    virtual void SetUp() {
+        auto b = GenerateStringBoard(50);
+
+        b_1 = b;
+        b_2 = b;
+        b_3 = b;
+        b_4 = b;
+
+        bs[0] = &b_1;
+        bs[1] = &b_2;
+        bs[2] = &b_3;
+        bs[3] = &b_4;
+    }
+
+    template <class B>
+    B naiveSolve(const B& b) {
+        Score s;
+        return NaiveSearch<B, Score>().Destroy(b, s);
+    }
+
+    template <class B>
+    B beamSolve(const B& b) {
+        Score_v1 s;
+        BeamSearch<B, Score_v1> bs;
+        bs.set_beam_width(100);
+        return bs.Destroy(b);
+    }
+
+};
+
+TEST_F(SearchTest, NaiveSameResultAllBoards) {
+    b_1 = naiveSolve(b_1);
+    b_2 = naiveSolve(b_2);
+    b_3 = naiveSolve(b_3);
+    b_4 = naiveSolve(b_4);
+
+    auto casts = b_1.CastHistory();
+    for (auto b_ptr : bs) {
+        ASSERT_EQ(casts, b_ptr->CastHistory());
+    }
+}
+
+TEST_F(SearchTest, BeamSameResultAllBoards) {
+    b_1 = beamSolve(b_1);
+    b_2 = beamSolve(b_2);
+    b_3 = beamSolve(b_3);
+    b_4 = beamSolve(b_4);
+
+    auto casts = b_1.CastHistory();
+    for (auto b_ptr : bs) {
+        ASSERT_EQ(casts, b_ptr->CastHistory());
+    }
+}
+

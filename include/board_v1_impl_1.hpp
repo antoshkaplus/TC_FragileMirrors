@@ -9,15 +9,15 @@
 #ifndef FRAGILE_MIRRORS_board_v1_h
 #define FRAGILE_MIRRORS_board_v1_h
 
-#include "board.hpp"
-#include "board_hash.hpp"
+#include "board_common.hpp"
 
 using namespace std;
 using namespace ant;
 using namespace ant::grid;
 
 
-class Board_v1 {
+template<class CastHistoryType>
+class Board_v1_Impl_1 : public Board_v1 {
 
     // supports -1, -1 origin now
     using Neighbors = OriginGrid<Grid<array<int8_t, 4>>>;
@@ -27,9 +27,9 @@ public:
     using HashType = BoardHash::HashType;
 
 
-    Board_v1() {}
+    Board_v1_Impl_1() {}
 
-    Board_v1(const vector<string>& board) : destroyed_count_(0),
+    Board_v1_Impl_1(const vector<string>& board) : destroyed_count_(0),
                                             board_size_((int)board.size()),
                                             board_hash_(board_size_) {
         InitCastCandidates();
@@ -37,13 +37,13 @@ public:
         InitNeighbors();
     }
 
-    bool operator==(const Board_v1& b) const {
+    bool operator==(const Board_v1_Impl_1& b) const {
         return neighbors_.grid() == b.neighbors_.grid();
     }
 
     // TODO
-    Board_v1 AfterCasts(Count cast_count) const {
-        Board_v1 b;
+    Board_v1_Impl_1 AfterCasts(Count cast_count) const {
+        Board_v1_Impl_1 b;
         b.board_size_ = board_size_;
         b.destroyed_count_ = 0;
         b.board_hash_ = board_hash_;
@@ -51,24 +51,24 @@ public:
         b.mirrors_ = mirrors_;
         b.InitNeighbors();
 
-        for (int i = 0; i < cast_count; ++i) {
-            b.Cast(history_casts_[i]);
-        }
+        history_casts_.ForEachUntil(cast_count, [&](const Position& p) {
+            b.Cast(p);
+        });
         return b;
     }
 
-    Count CastCount() const {
-        return history_casts_.size();
+    Count CastCount() const override {
+        return history_casts_.Count();
     }
 
     // return count of destroyed
     // to know if anything was destroyed at all
-    Count Cast(const Position& ppp) {
+    Count Cast(const Position& ppp) override {
         last_cast_.clear();
-        history_casts_.push_back(ppp);
+        history_casts_.Push(ppp);
         Position p = ppp;
         auto& mirs = *mirrors_;
-        Direction dir = FromDirection(*this, p);
+        Direction dir = FromDirection(p);
         tie(p, dir) = NextFrom(p, dir);
         Count count = 0;
         while (mirs[p] != kMirBorder) {
@@ -82,12 +82,12 @@ public:
         return count;
     }
 
-    const vector<Position>& CastCandidates() const {
-        return cast_candidates_;
+    const vector<Position>& CastCandidates() const override {
+        return *cast_candidates_;
     }
 
-    void Restore() {
-        history_casts_.pop_back();
+    void Restore() override {
+        history_casts_.Pop();
         destroyed_count_ -= last_cast_.size();
         assert(destroyed_count_ >= 0);
         while (!last_cast_.empty()) {
@@ -100,24 +100,25 @@ public:
         return board_size_;
     }
 
-    Int size() const {
+    Int size() const override {
         return board_size_;
     }
 
-    auto hash() const {
+    HashType hash() const override {
         return board_hash_.hash();
     }
 
-    bool AllDestroyed() const {
+    bool AllDestroyed() const override {
         assert(destroyed_count_ <= mirror_count());
         return destroyed_count_ == mirror_count();
     }
 
-    const vector<Position>& CastHistory() const {
-        return history_casts_;
+    // maybe think about something different
+    vector<Position> CastHistory() const override {
+        return ToVector(history_casts_);
     }
 
-    Count MirrorsDestroyed() const {
+    Count MirrorsDestroyed() const override {
         return destroyed_count_;
     }
 
@@ -125,7 +126,7 @@ public:
         return size()*size();
     }
 
-    Count EmptyLinesCount() const {
+    Count EmptyLinesCount() const override {
         Count count = 0;
         for (int i = 0; i < board_size_; ++i) {
             if (neighbors_(-1, i)[kDirDown] == board_size_) ++count;
@@ -134,8 +135,8 @@ public:
         return count;
     }
 
-    bool IsLineEmpty(Position p) {
-        Direction dir = FromDirection(*this, p);
+    bool IsLineEmpty(Position p) const override {
+        Direction dir = FromDirection(p);
         tie(p, dir) = NextFrom(p, dir);
         auto& mirs = *mirrors_;
         return mirs[p] == kMirBorder;
@@ -168,27 +169,40 @@ public:
         return *mirrors_;
     }
 
+    bool IsCastPosition(const Position& p) const {
+        return p.row == -1 || p.col == -1 || p.row == board_size() || p.col == board_size();
+    }
 
+
+    unique_ptr<Board> Clone() const override {
+        return move(make_unique<Board_v1_Impl_1>(*this));
+    }
+
+    ~Board_v1_Impl_1() {}
 
 private:
     
-    Direction FromDirection(const Board_v1& b, const Position& p) {
+    Direction FromDirection(const Position& p) const {
         if (p.row == -1) {
             return kDirUp;
         } else if (p.col == -1) {
             return kDirLeft;
-        } else if (p.row == b.board_size()) {
+        } else if (p.row == board_size()) {
             return kDirDown;
-        } else if (p.col == b.board_size()){
+        } else if (p.col == board_size()){
             return kDirRight;
         } else {
-            throw runtime_error("cant deduct direction from position");
+            stringstream s;
+            s << "cant deduct direction from position ";
+            s << p;
+            throw runtime_error(s.str());
         }
     }
 
     void InitCastCandidates() {
-        cast_candidates_.reserve(4*board_size_);
-        auto& c = cast_candidates_;
+        cast_candidates_.reset(new vector<Position>());
+        cast_candidates_->reserve(4*board_size_);
+        auto& c = *cast_candidates_;
         for (Index i = 0; i < board_size_; ++i) {
             c.emplace_back(i, -1);
             c.emplace_back(i, board_size_);
@@ -207,7 +221,7 @@ private:
         auto func = [&](const Position& p) {
             mirs(p) = IsRightMirror(board[p.row][p.col]) ? kMirRight : kMirLeft;
         };
-        Region{{0, 0}, Size{board_size_, board_size_}}.ForEach(func);
+        Region(Position{0, 0}, Size(board_size_, board_size_)).ForEach(func);
         // need some adjustments for sides
         for (auto i = 0; i < board_size_; ++i) {
             mirs(-1, i) = mirs(board_size_, i)
@@ -301,7 +315,6 @@ private:
         board_hash_.HashOut(p);
     }
 
-
     // should initialize only once in constructor probably
     Neighbors neighbors_;
     // sum of history_count_
@@ -311,11 +324,11 @@ private:
     BoardHash board_hash_;
 
     vector<Position> last_cast_;
-    vector<Position> history_casts_;
+    CastHistoryType history_casts_;
 
     shared_ptr<Mirrors> mirrors_;
 
-    vector<Position> cast_candidates_;
+    shared_ptr<vector<Position>> cast_candidates_;
 
 
 

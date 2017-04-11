@@ -7,7 +7,7 @@
 
 #include "util.hpp"
 #include "score.hpp"
-#include "board_v1.hpp"
+#include "board_v1_impl_1.hpp"
 #include "naive_search.hpp"
 #include "beam_search.hpp"
 #include "fragile_mirrors.hpp"

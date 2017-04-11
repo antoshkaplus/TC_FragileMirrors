@@ -5,13 +5,11 @@
 //  Created by Anton Logunov on 1/8/15.
 //
 //
+#pragma once
 
-#ifndef FRAGILE_MIRRORS_board_v6_hpp
-#define FRAGILE_MIRRORS_board_v6_hpp
+#include "board_common.hpp"
 
-#include "util.hpp"
-
-class Board_v6 {
+class Board_v6 : public Board_v2 {
 private:
     
     using int8_t = short;
@@ -85,34 +83,13 @@ private:
         } }
     } };
     
-    
-    Count board_size_;
-    Count mirrors_destroyed_;
-    Count empty_lines_count_;
-    
-    Count filled_space_;
-    Count empty_space_;
-    
-    HashType hash_;
-    
-    vector<Item> items_;
-    // they are first in items
-    // where is ray directed
-    vector<Direction> ray_direction_;
-    array<vector<char>, 2> mirrors_left_;
-    
-    shared_ptr<Mirrors> mirrors_;
-    shared_ptr<HashFunction> hash_function_;
-    shared_ptr<CastNode> history_casts_;
-    // use for reduce and restore
-    shared_ptr<vector<short>> buffer_;
-    
+
 public:
     
     Board_v6() {}
     
-    Board_v6(const vector<string>& str_board) {
-        board_size_ = str_board.size();
+    Board_v6(const vector<string>& str_board) : board_size_(str_board.size()),
+                                                hash_(board_size_) {
         mirrors_destroyed_ = 0;
         empty_lines_count_ = 0;
         
@@ -212,17 +189,16 @@ private:
     }
     
     void InitHash() {
-        hash_function_.reset(new HashFunction({board_size_, board_size_}, 1));
         for (auto r = 0; r < board_size_; ++r) {
             for (auto c = 0; c < board_size_; ++c) {
-                HashIn(r, c);
+                hash_.HashIn(r, c);
             }
         }
     }
     
 public:
     
-    Count CastRestorable(short ray_index) {
+    Count CastRestorable(short ray_index) override {
         auto& last = *buffer_; 
         last.clear();
         auto& mirs = *mirrors_; 
@@ -245,10 +221,9 @@ public:
         return last.size();
     }
     
-    void Cast(short ray_index) {
+    Count Cast(short ray_index) override {
         auto& mirs = *mirrors_;
-        shared_ptr<CastNode> new_node(new CastNode({items_[ray_index].row, items_[ray_index].col}, history_casts_));
-        history_casts_ = new_node;
+        history_casts_.Push({items_[ray_index].row, items_[ray_index].col});
         
         Ray ray = NextFromBorder(ray_index);
         Count count = 0;
@@ -261,10 +236,10 @@ public:
         empty_space_ += count;
         filled_space_ -= count;
         mirrors_destroyed_ += count;
-        
+        return count;
     }
     
-    void Restore() {
+    void Restore() override {
         auto& last = *buffer_; 
         auto& mirs = *mirrors_;
         
@@ -286,8 +261,8 @@ public:
         
         if (--mirrors_left_[kOrientVer][row] == 0) {
             ++empty_lines_count_;
-        } 
-        HashOut({row, col});
+        }
+        hash_.HashOut({row, col});
     }
     
     void DestroyLinks(short index) {
@@ -305,7 +280,7 @@ public:
         if (++mirrors_left_[kOrientVer][row] == 1) {
             --empty_lines_count_;
         } 
-        HashIn({row, col});
+        hash_.HashIn({row, col});
     }
     
     
@@ -373,28 +348,28 @@ public:
         
     }
     
-    bool AllDestroyed() const {
+    bool AllDestroyed() const override {
         return empty_lines_count_ == 2 * board_size_;
     }
     
-    Count size() const {
+    Count size() const override {
         return board_size_;
     }
     
-    Count RayCount() const {
+    Count RayCount() const override {
         return ray_direction_.size();
     }
     
-    Count MirrorsDestroyed() const {
+    Count MirrorsDestroyed() const override {
         return mirrors_destroyed_;
     }
     
-    Count EmptyLinesCount() const {
+    Count EmptyLinesCount() const override {
         return empty_lines_count_;
     }
     
-    HashType hash() const {
-        return hash_;
+    HashType hash() const override {
+        return hash_.hash();
     }
     
     Count EmptySpace() const {
@@ -404,30 +379,20 @@ public:
     Count FilledSpace() const {
         return filled_space_;
     }
-    
-    shared_ptr<CastNode> CastHistory() const {
-        return history_casts_;
+
+    Count CastCount() const override {
+        return history_casts_.Count();
+    }
+
+    vector<Position> CastHistory() const override {
+        return ToVector(history_casts_);
+    }
+
+    unique_ptr<Board> Clone() const override {
+        return make_unique<Board_v6>(*this);
     }
     
-private: 
-    
-    void HashIn(char row, char col) {
-        HashIn({row, col});
-    }
-    
-    void HashOut(char row, char col) {
-        HashOut({row, col});
-    }
-    
-    void HashIn(const Position& p) {
-        hash_function_->xorNothing(&hash_); // xor out 
-        hash_function_->xorState(&hash_, p, 0);
-    }
-    
-    void HashOut(const Position& p) {
-        hash_function_->xorState(&hash_, p, 0); // xor out
-        hash_function_->xorNothing(&hash_); // xor in
-    }
+private:
     
     Ray NextFromMirror(const Ray& ray, char mir) const {
         Direction dir = kDirReflection[mir][ray.dir];
@@ -443,8 +408,26 @@ private:
     Ray NextFromEmpty(const Ray& ray) const {
         return {items_[ray.pos].ns[ray.dir], ray.dir};
     }
-    
+
+
+    Count board_size_;
+    Count mirrors_destroyed_;
+    Count empty_lines_count_;
+
+    Count filled_space_;
+    Count empty_space_;
+
+    BoardHash hash_;
+
+    vector<Item> items_;
+    // they are first in items
+    // where is ray directed
+    vector<Direction> ray_direction_;
+    array<vector<char>, 2> mirrors_left_;
+
+    shared_ptr<Mirrors> mirrors_;
+    CastHistory_Nodes history_casts_;
+    // use for reduce and restore
+    shared_ptr<vector<short>> buffer_;
+
 };
-
-
-#endif

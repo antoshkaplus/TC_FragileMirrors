@@ -5,7 +5,7 @@
 cmake_minimum_required (VERSION 3.2)
 project (FragileMirrors)
 
-list(APPEND CMAKE_CXX_FLAGS " -std=c++1z -Werror -Wall -Wno-error=char-subscripts -Wno-char-subscripts")
+list(APPEND CMAKE_CXX_FLAGS " -std=c++1z -stdlib=libc++ -Werror -Wall -Wno-error=char-subscripts -Wno-char-subscripts -Wno-unused-const-variable")
 
 set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} ")
 set(CMAKE_CXX_FLAGS_RELEASE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 ")
@@ -59,8 +59,19 @@ target_link_libraries(psyho fragmir)
 add_executable(eldidou "app/main_template.cpp" "others/eldidou.cpp")
 target_link_libraries(eldidou fragmir)
 
+find_library(GTEST_LIBRARY gtest)
+
 # tests
 file(GLOB_RECURSE TEST_SOURCE_FILES "test/*.cpp")
 
-add_executable(unittest ${TEST_SOURCE_FILES} test/board.cpp)
-target_link_libraries(unittest fragmir gtest)
+add_executable(unittest ${TEST_SOURCE_FILES})
+target_link_libraries(unittest fragmir ${GTEST_LIBRARY})
+
+
+find_library(GBENCHMARK_LIBRARY benchmark)
+
+# benchmarks
+file(GLOB_RECURSE BENCHMARK_SOURCE_FILES "benchmark/*.cpp")
+
+add_executable(benchmark ${BENCHMARK_SOURCE_FILES})
+target_link_libraries(benchmark fragmir ${GBENCHMARK_LIBRARY})

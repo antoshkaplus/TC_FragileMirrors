@@ -11,6 +11,7 @@
 #include "ant/core/core.hpp" 
 
 #include "util.hpp"
+#include "board.hpp"
 
 
 Position CastIntToPosition(Index castInd, Count boardSz) {
@@ -31,8 +32,7 @@ Position CastIntToPosition(Index castInd, Count boardSz) {
 }
 
 
-template<class Board>
-void RandomCast(Board& b) {
+void RandomCast(Board_v1& b) {
     int index = uniform_int_distribution<>(0, 4*b.size()-1)(RNG);
     for (auto i = index; i < b.size() + index; ++i) {
         auto p = CastIntToPosition(i % b.size(), b.size());
@@ -45,31 +45,31 @@ void RandomCast(Board& b) {
 
 
 // returns number of moves taken to destroy the mirrors
-template<class Board>
-Count RandomPlayout(Board b) {
+Count RandomPlayout(const Board_v1& b) {
+    unique_ptr<Board> b_clone = b.Clone();
+    Board_v1& b_play = static_cast<Board_v1&>(*b_clone);
     Count castCount = 0;
-    while (!b.AllDestroyed()) {
-        RandomCast(b);
+    while (!b_play.AllDestroyed()) {
+        RandomCast(b_play);
         ++castCount;
     }
     return castCount;
 }
 
 
-template<class Board>
 struct NestedMonteCarloSearch {
 public:
-    using BoardType = Board_v1;
-    
-    Board Destroy(const Board& board) {
-        Board b = board;
+
+    unique_ptr<Board_v1> Destroy(const Board_v1& board) {
+        auto b_clone = board.Clone();
+        auto& b = static_cast<Board_v1&>(*b_clone);
 
         while (!b.AllDestroyed()) {
             Position bestCast;
             int minCount = numeric_limits<int>::max();
             for (auto p : b.CastCandidates()) {
                 if (b.Cast(p) > 0) {
-                    Count castCount = RandomPlayout<BoardType>(b);
+                    Count castCount = RandomPlayout(b);
                     if (minCount > castCount) {
                         minCount = castCount;
                         bestCast = p;
@@ -79,7 +79,10 @@ public:
             }
             b.Cast(bestCast);
         }
-        return b;
+
+        unique_ptr<Board_v1> b_uni(&b);
+        b_clone.release();
+        return b_uni;
     }
 
 };

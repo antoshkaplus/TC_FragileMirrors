@@ -22,17 +22,16 @@ public:
     Board Destroy(const Board& b_in, Score& s) {
         Board bb(b_in);
         C best_cast;
-        double score, best_score;
+        double score, best_score = numeric_limits<double>::min();
         while (!bb.AllDestroyed()) {
-            for (auto cast : bb.CastCandidates()) {
-                bb.Cast(cast);
+            auto func = [&](auto cast) {
                 score = s(bb);
-                bb.Restore();
                 if (score > best_score) {
                     best_cast = cast;
                     best_score = score;
                 }
-            }
+            };
+            bb.ForEachAppliedCast(func);
             bb.Cast(best_cast);
         }
         return bb;

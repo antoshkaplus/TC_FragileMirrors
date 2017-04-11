@@ -8,21 +8,25 @@
 #pragma once
 
 #include "util.hpp"
+#include "board.hpp"
+#include "score.hpp"
 
 
-template<class Board, class Score>
+// has to keep ScoreType as template parameter to support
+// score functions that require specific board class as argument
+template<class BoardType, class ScoreType>
 class BeamSearch {
-    
-    using HashType = typename Board::HashType;
-    using CastType = typename Board::CastType;
+
+    using HashType = typename BoardType::HashType;
+    using CastType = typename BoardType::CastType;
     
     /// can make use of more parametered possibly 
     struct Derivative {
         Derivative() {}
-        Derivative(Board* b, const CastType& p, HashType h, double s) 
+        Derivative(BoardType* b, const CastType& p, HashType h, double s)
         : origin(b), cast(p), hash(h), score(s) {}
-        
-        Board* origin;
+
+        BoardType* origin;
         CastType cast;
         HashType hash;
         double score;
@@ -35,11 +39,11 @@ class BeamSearch {
 
 public:
 
-    Board Destroy(const Board& b_in) {
+    BoardType Destroy(const BoardType& b_in) {
         unordered_set<HashType> visited;
         vector<Derivative> derivs;
-        vector<Board> b_0;
-        vector<Board> b_1;
+        vector<BoardType> b_0;
+        vector<BoardType> b_1;
         b_0.reserve(beam_width_);
         b_1.reserve(beam_width_);
         Count side_count = 4;
@@ -50,15 +54,14 @@ public:
         while (true) {
             for (auto& b : *cur) {
                 Count d_was = b.MirrorsDestroyed();
-                for (auto& c : b.CastCandidates()) {
-                    b.Cast(c);
+                auto func = [&](CastType c) {
                     Count d_now = b.MirrorsDestroyed();
                     if (d_now > d_was && visited.count(b.hash()) == 0) {
                         visited.insert(b.hash());
                         derivs.emplace_back(&b, c, b.hash(), score_(b));
                     }
-                    b.Restore();
-                }
+                };
+                b.ForEachAppliedCast(func);
             }
             Count sz = min<Count>(beam_width_, derivs.size());
             nth_element(derivs.begin(), derivs.begin()+sz-1, derivs.end());
@@ -70,7 +73,7 @@ public:
                 derivs[i].origin->Restore();
             }
             swap(cur, next);
-            auto rr = max_element(cur->begin(), cur->end(), [] (const Board& b_0, const Board& b_1) {
+            auto rr = max_element(cur->begin(), cur->end(), [] (const BoardType& b_0, const BoardType& b_1) {
                 return b_0.MirrorsDestroyed() < b_1.MirrorsDestroyed();
             });
             if (rr->AllDestroyed()) {
@@ -83,15 +86,14 @@ public:
         }
     }
 
-    void set_score(Score score) {
+    void set_score(ScoreType score) {
         score_ = score;
     }
 
     void set_beam_width(Count beam_width) {
         beam_width_ = beam_width;
     }
-    
-    
+
     Count beam_width_;
-    Score score_;
+    ScoreType score_;
 };

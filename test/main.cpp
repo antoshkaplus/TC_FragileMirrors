@@ -9,10 +9,11 @@
 #include <iostream>
 #include <fstream>
 
-#include "util.hpp"
-#include "board_v1.hpp"
-
 #include "gtest/gtest.h"
+
+#include "util.hpp"
+#include "board_v1_impl_1.hpp"
+
 
 
 using namespace std;

@@ -18,10 +18,11 @@
 
 #include "beam_search_history.hpp"
 #include "beam_search.hpp"
-#include "board_v1.hpp"
+#include "board_v1_impl_1.hpp"
 #include "score.hpp"
 #include "board.hpp"
 #include "util.hpp"
+#include "cast_history.hpp"
 
 using namespace std::placeholders;
 
@@ -86,12 +87,12 @@ vector<double> ReadDestroyedCoeffs(istream& in);
 // score diff between best and max
 
 // we need to have some place to write it down
-void LevelScoreDiff(BeamSearchHistory<Board_v1, Score_v1<Board_v1>>& bs_history, Board_v1 orig_board, Board_v1& sol) {
+void LevelScoreDiff(BeamSearchHistory<Board_v1_Impl_1<CastHistory_Nodes>, Score_v1>& bs_history, Board_v1_Impl_1<CastHistory_Nodes> orig_board, Board_v1_Impl_1<CastHistory_Nodes>& sol) {
     auto& levels = bs_history.beam_levels();
-    auto& casts = sol.CastHistory();
+    auto casts = sol.CastHistory();
     for (auto i = 0; i < casts.size(); ++i) {
         auto& beam = levels[i];
-        auto fn = std::bind(&BeamSearchHistory<Board_v1, Score_v1<Board_v1>>::score, bs_history, _1);
+        auto fn = std::bind(&BeamSearchHistory<Board_v1_Impl_1<CastHistory_Nodes>, Score_v1>::score, bs_history, _1);
         auto max_board = MaxElement(beam.begin(), beam.end(), fn);
         auto min_board = MinElement(beam.begin(), beam.end(), fn);
         auto max_score = bs_history.score(*max_board);
