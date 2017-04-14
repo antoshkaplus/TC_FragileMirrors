@@ -16,7 +16,7 @@ using namespace std;
 // space optimization
 // ray indexes are used
 template <class CastHistoryType>
-class Board_v2_Impl_1 : public Board_v2 {
+class Board_v2_Impl_1 : public Board_v2_Reduce {
 private:
     
     using int8_t = short;
@@ -215,7 +215,7 @@ public:
         return last.size();
     }
     
-    Count Cast(short ray_index) override {
+    Count CastImpl(short ray_index) override {
         auto& ray_item = items_[ray_index];
         history_casts_.Push({ray_item.row, ray_item.col});
 
@@ -311,7 +311,7 @@ public:
     }
     
     // 4 * Number of items
-    void Reduce() {
+    void Reduce() override {
         auto& offset = *reduce_buffer_;
         offset.resize(items_.size());
         for (auto i = 0; i < ray_direction_.size(); ++i) {
@@ -384,12 +384,16 @@ public:
         return board_hash_.hash();
     }
     
-    Count EmptySpace() const {
+    Count EmptySpace() const override {
         return empty_space_;
     }
     
     Count FilledSpace() const {
         return filled_space_;
+    }
+
+    Count TotalSpace() const override {
+        return items_.size();
     }
 
     vector<Position> CastHistory() const override {

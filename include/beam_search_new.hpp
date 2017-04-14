@@ -5,209 +5,25 @@
 
 #include <functional>
 
-#include "util.hpp"
 #include "board_v1_impl_1.hpp"
-#include "cast_history.hpp"
-#include "score.hpp"
 #include "naive_search.hpp"
+#include "derivative.hpp"
+#include "discovery.hpp"
 
 using namespace std::placeholders;
 
 
-
-struct Derivative {
-    shared_ptr<const Board_v1> board;
-    Position cast;
-    double score;
-    Board_v1::HashType hash;
-
-    Derivative() {}
-    Derivative(shared_ptr<const Board_v1> board, Position cast, double score, Board_v1::HashType hash)
-            : board(board), cast(cast), score(score), hash(hash) {}
-
-    bool operator<(const Derivative& s) const {
-        return score < s.score;
-    }
-
-	bool operator>(const Derivative& s) const {
-		return score > s.score;
-	}
-};
-
-
-// it's a little bit different
-struct LevelDerivatives {
-	
-	// later can make method with another argument, like functor
-	// at some point we have to shrink most certainly
-    vector<Derivative> ExtractPromotion(int count) {
-		auto sz = min<Count>(count, derivs_.size());
-		nth_element(derivs_.begin(), derivs_.begin()+sz-1, derivs_.end(), std::greater<Derivative>());
-		vector<Derivative> res(derivs_.begin(), derivs_.begin()+sz);
-		derivs_.erase(derivs_.begin(), derivs_.begin()+sz);
-		return res;
-	}
-
-    void Insert(const Derivative& d) {
-		derivs_.push_back(d);
-	}
-
-	bool PushAll(const vector<Derivative>& derivs) {
-		derivs_.insert(derivs_.end(), derivs.begin(), derivs.end());
-	    return true;
-    }
-
-    void Cap() {
-        if (derivs_.size() > cap_) {
-            nth_element(derivs_.begin(), derivs_.begin()+cap_-1, derivs_.end(), std::greater<Derivative>());
-            derivs_.erase(derivs_.begin()+cap_, derivs_.end());
-        }
-    }
-
-    Count derivatives_left() const {
-        return derivs_.size();
-    }
-
-private:
-	vector<Derivative> derivs_;
-    int cap_{20000};
-};
-
-
-// elements with highest score go first
-struct LevelDerivativesNew {
-
-    // later can make method with another argument, like functor
-    // at some point we have to shrink most certainly
-    vector<Derivative> ExtractPromotion(int count) {
-        auto res = best_;
-        best_.clear();
-
-        auto sz = min<Count>(promotion_count_, rest_.size());
-        nth_element(rest_.begin(), rest_.begin()+sz-1, rest_.end(), std::greater<Derivative>());
-        best_.insert(best_.begin(), rest_.begin(), rest_.begin()+sz);
-        sort(best_.begin(), best_.end(), std::greater<Derivative>());
-        rest_.erase(rest_.begin(), rest_.begin()+sz);
-
-        return res;
-    }
-
-    // we consider that if best is empty rest is also should be empty
-    bool PushAll(vector<Derivative>& derivs) {
-        bool best_updated = false;
-        if (best_.size() < promotion_count_) {
-            auto sz = min(promotion_count_-best_.size(), derivs.size());
-            if (sz > 0) best_updated = true;
-            best_.insert(best_.end(), derivs.begin()+derivs.size()-sz, derivs.end());
-            derivs.erase(derivs.begin()+derivs.size()-sz, derivs.end());
-            sort(best_.begin(), best_.end(), std::greater<Derivative>());
-        }
-        for (auto& d : derivs) {
-            if (best_.back().score < d.score) {
-                best_updated = true;
-                auto b = best_.back();
-                best_.pop_back();
-                best_.insert(upper_bound(best_.begin(), best_.end(), d, std::greater<Derivative>()), d);
-                d = b;
-            }
-        }
-        rest_.insert(rest_.end(), derivs.begin(), derivs.end());
-
-        return best_updated;
-    }
-
-    void Cap() {
-        if (rest_.size() > cap_) {
-            nth_element(rest_.begin(), rest_.begin()+cap_-1, rest_.end(), std::greater<Derivative>());
-            rest_.erase(rest_.begin()+cap_, rest_.end());
-        }
-    }
-
-    Count derivatives_left() const {
-        return best_.size() + rest_.size();
-    }
-
-private:
-
-    void ReplenishBest() {
-
-    }
-
-    int promotion_count_{100};
-    int cap_{20000};
-    vector<Derivative> best_;
-    vector<Derivative> rest_;
-};
-
-
-struct Discovery {
-    using Board = Board_v1;
-
-    bool Discover(const Board& b) {
-        return discovered_.insert(b.hash()).second;
-    }
-
-private:
-
-    unordered_set<Board::HashType> discovered_;
-
-};
-
-struct DiscoveryNew {
-    using Board = Board_v1;
-
-    bool Discover(const Board& b) {
-        auto it = discovered_.find(b.hash());
-        if (it == discovered_.end() || it->second > b.CastCount()) {
-            discovered_[b.hash()] = b.CastCount();
-            return true;
-        }
-        return false;
-    }
-
-private:
-    // look for less count of cast on discover
-    unordered_map<Board::HashType, Count> discovered_;
-
-};
-
-
-// result is little bit worse because we lose board state info with lower amount of bits
-struct DiscoveryFast {
-    static constexpr int BIT_COUNT = 28;
-
-    using Board = Board_v1;
-
-    DiscoveryFast() {
-        discovered_.resize(2 << BIT_COUNT, 0);
-    }
-
-    bool Discover(const Board& b) {
-        auto index = ((uint32_t)b.hash().to_ulong() << (32-BIT_COUNT)) >> (32-BIT_COUNT);
-        if (discovered_[index] == 0 || discovered_[index] > b.CastCount()) {
-            discovered_[index] = b.CastCount();
-            return true;
-        }
-        return false;
-    }
-
-private:
-    vector<uint8_t> discovered_;
-};
-
-
-// trying to incorporate dynamic width
-
-// many things are probably better off implemented outside
-
+template <class Board>
 class BeamSearchNew {
 
-    using BoardType = Board_v1_Impl_1<CastHistory_Nodes>;
-    using HashType = Board_v1::HashType;
-    using Score = Score_v1;
-    using Board = BoardType;
+    using BoardType = Board;
+    using HashType = typename Board::HashType;
+    using ScoreType = Score_v1;
+    using CastType = typename Board::CastType;
 
-    // can make use of more parametered possibly
+    using Derivative = Derivative<Board>;
+    using LevelDerivatives = LevelDerivatives<Derivative>;
+
 public:
     Board Destroy(const Board& b) {
 		original_ = b;
@@ -237,7 +53,7 @@ public:
 		return solution_;
     }
 
-	void set_score(Score& s) {
+	void set_score(ScoreType& s) {
 		score_ = s;
 	}
 
@@ -314,7 +130,7 @@ private:
 	
 	void UpdateScoreStatsWithSolution(const Board& board) {
 		Board b = original_;
-		auto casts = board.CastHistory();
+		auto casts = board.CastRayHistory();
 		// last one is not relevant as we look for even better solutions
 		for (auto i = 0; i < board.CastCount()-1; ++i) {
             b.Cast(casts[i]);
@@ -322,7 +138,7 @@ private:
 		}
 	}
 	
-	void SetSolution(Board sol) {
+	void SetSolution(const Board& sol) {
 		// set new bound on number of casts
 		level_derivs_.resize(sol.CastCount()-1);
 		// now we have to update our level_score_stats_
@@ -340,16 +156,14 @@ private:
     vector<Derivative> ComputeBoardDerivatives(Board b) {
         vector<Derivative> res;
         auto b_ptr = make_shared<Board>(b);
-        for (auto p : b.CastCandidates()) {
-            b.Cast(p);
-			// if cast is empty, board has to be discovered
+        b.ForEachAppliedCast([&](CastType cast){
+            // if cast is empty, board has to be discovered
             if (discovery_.Discover(b)) {
-                Derivative st(b_ptr, p, score_(b), b.hash());
+                Derivative st(b_ptr, cast, score_(b), b.hash());
                 res.push_back(st);
             }
-            // somewhere we have to check if it;s finish and if yes we should reduce number of levels
-            b.Restore();
-        }
+            // somewhere we have to check if it's finish and if yes we should reduce number of levels
+        });
         return res;
     }
 	
@@ -366,8 +180,7 @@ private:
 		double max;
 		double best;
 	};
-	
-	
+
 	// after we do the cast we come to the level
     vector<LevelDerivatives> level_derivs_;
     vector<ScoreStats> level_score_stats_;
@@ -376,6 +189,6 @@ private:
     DiscoveryNew discovery_;
 	Board solution_;
 	Board original_;
-	Score score_;
+	ScoreType score_;
     Count millis_{30000};
 };

@@ -84,4 +84,29 @@ public:
     virtual ~Board_v2() {}
 };
 
+class Board_v2_Reduce : public Board_v2 {
+public:
 
+    Count Cast(short ray_index) final {
+        auto destroyed = CastImpl(ray_index);
+        if (EmptySpace()/TotalSpace() > reduce_empty_ratio_) {
+            Reduce();
+        }
+        return destroyed;
+    }
+
+    void set_reduce_empty_ratio(double ratio) {
+        reduce_empty_ratio_ = ratio;
+    }
+
+protected:
+    virtual Count CastImpl(short ray_index) = 0;
+    virtual void Reduce() = 0;
+
+    virtual Count EmptySpace() const = 0;
+    virtual Count TotalSpace() const = 0;
+
+private:
+    // best parameter found out from benchmarking
+    double reduce_empty_ratio_{0.63};
+};

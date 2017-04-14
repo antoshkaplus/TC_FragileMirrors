@@ -16,9 +16,7 @@
 #include "dfs.hpp"
 #include "stats.hpp"
 
-using BoardType = Board_v1_Impl_1<CastHistory_Nodes>;
-
-
+using B_1 = Board_v1_Impl_1<CastHistory_Nodes>;
 
 
 
@@ -29,17 +27,16 @@ int main(int argc, const char * argv[]) {
     ifstream in(input);
     ofstream out(output);
     vector<string> board = GenerateStringBoard(60); // ReadBoard(in);
-    BoardType b(board);
     Score_v1 s;
 //    BeamSearchHistory<decltype(b), decltype(s)> solver;
     //BeamSearch<BoardType, decltype(s)> solver;
-    BeamSearchNew solver;
+    BeamSearchNew<Board_v6> solver;
     solver.set_beam_width(100);
+    solver.set_millis(10000);
     solver.set_score(s);
-    auto w = solver.Destroy(b);
+    auto w = solver.Destroy(board);
     //LevelScoreDiff(solver, b, w);
     PrintSolution(out, w.CastHistory());
-    Board_v2_Impl_1<CastHistory_Nodes> bb;
 
     Println(cout, solver.level_derivs_used());
     auto& level_derivs = solver.level_derivs();

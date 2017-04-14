@@ -34,9 +34,9 @@ template <class B>
 static void BoardCastBenchmark(benchmark::State& state) {
     RNG.seed(0);
     B b = GenerateStringBoard(state.range(0));
-    while (!b.AllDestroyed()) {
-        uniform_int_distribution<> ray_distr(0, b.RayCount()-1);
-        while (state.KeepRunning()) {
+    while (state.KeepRunning()) {
+        while (!b.AllDestroyed()) {
+            uniform_int_distribution<> ray_distr(0, b.RayCount()-1);
             b.Cast(ray_distr(RNG));
         }
     }
@@ -46,5 +46,38 @@ BENCHMARK_TEMPLATE(BoardCastBenchmark, B_1)->Arg(50)->Arg(100);
 BENCHMARK_TEMPLATE(BoardCastBenchmark, B_2)->Arg(50)->Arg(100);
 BENCHMARK_TEMPLATE(BoardCastBenchmark, B_3)->Arg(50)->Arg(100);
 
+
+struct P {
+    int sz;
+    double reduce_ratio;
+};
+
+vector<P> ReduceBenchmarkArgs() {
+    vector<P> args;
+    for (auto i : {50, 75, 100}) {
+        for (auto r : {0.5, 0.63, 0.75, 1.}) {
+            args.push_back({i, r});
+        }
+    }
+    return args;
+}
+
+static void ReduceBenchmark(benchmark::State& state) {
+    BeamSearch<B_3, Score_v1> bs;
+    bs.set_beam_width(1000);
+    RNG.seed(0);
+    auto args = ReduceBenchmarkArgs();
+
+    while (state.KeepRunning()) {
+        auto p = args[state.range(0)];
+        for (auto i = 0; i < 4; ++i) {
+            Board_v6 b = GenerateStringBoard(p.sz);
+            b.set_reduce_empty_ratio(p.reduce_ratio);
+                bs.Destroy(b);
+            }
+    }
+}
+
+BENCHMARK(ReduceBenchmark)->DenseRange(0, ReduceBenchmarkArgs().size()-1);
 
 

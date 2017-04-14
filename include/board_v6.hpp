@@ -9,7 +9,7 @@
 
 #include "board_common.hpp"
 
-class Board_v6 : public Board_v2 {
+class Board_v6 : public Board_v2_Reduce {
 private:
     
     using int8_t = short;
@@ -104,7 +104,7 @@ public:
         InitMirrors(str_board);
         buffer_.reset(new vector<short>());
     }
-    
+
 private:
     
     void InitItems() {
@@ -197,7 +197,7 @@ private:
     }
     
 public:
-    
+
     Count CastRestorable(short ray_index) override {
         auto& last = *buffer_; 
         last.clear();
@@ -221,9 +221,9 @@ public:
         return last.size();
     }
     
-    Count Cast(short ray_index) override {
+    Count CastImpl(short ray_index) override {
         auto& mirs = *mirrors_;
-        history_casts_.Push({items_[ray_index].row, items_[ray_index].col});
+        history_casts_.Push({items_[ray_index].row, items_[ray_index].col}, ray_index);
         
         Ray ray = NextFromBorder(ray_index);
         Count count = 0;
@@ -293,7 +293,7 @@ public:
     }
     
     // 4 * Number of items
-    void Reduce() {
+    void Reduce() override {
         auto& offset = *buffer_;
         offset.resize(items_.size());
         auto cur = 0;
@@ -372,10 +372,14 @@ public:
         return hash_.hash();
     }
     
-    Count EmptySpace() const {
+    Count EmptySpace() const override {
         return empty_space_;
     }
-    
+
+    Count TotalSpace() const override {
+        return items_.size();
+    }
+
     Count FilledSpace() const {
         return filled_space_;
     }
@@ -386,6 +390,10 @@ public:
 
     vector<Position> CastHistory() const override {
         return ToVector(history_casts_);
+    }
+
+    vector<short> CastRayHistory() const {
+        return ToRayVector(history_casts_);
     }
 
     unique_ptr<Board> Clone() const override {
@@ -426,7 +434,7 @@ private:
     array<vector<char>, 2> mirrors_left_;
 
     shared_ptr<Mirrors> mirrors_;
-    CastHistory_Nodes history_casts_;
+    CastHistory_Nodes_v2 history_casts_;
     // use for reduce and restore
     shared_ptr<vector<short>> buffer_;
 

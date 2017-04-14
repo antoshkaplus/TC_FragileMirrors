@@ -7,16 +7,10 @@ TopCoder marathon match problem
 Don't forget that there is dependency on Ant library
 
 TODO:
-- time management
-- reduce parameter
-- reduce swap with number of rays
-- empty line count parameter +
 - overhead parameter : issue
-
 - beam width depends from iteration to iteration
 - increase at the end
+- even/odd number of cols/rows add to heuristic
 
-- way to compare results with each other
-
-"scores" folder is for all the solutions,
-have to keep it to not run all the solutions every time.
+## Notes:
+- "scores" folder is for all the solutions, have to keep it to not run all the solutions every time.

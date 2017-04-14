@@ -17,7 +17,7 @@
 using namespace std;
 
 // more optimization involved
-class Board_v5 : public Board_v2 {
+class Board_v5 : public Board_v2_Reduce {
 private:
     
     using int8_t = short;
@@ -226,7 +226,7 @@ public:
         return last.size();
     }
     
-    Count Cast(short ray_index) override {
+    Count CastImpl(short ray_index) override {
         auto& mirs = *mirrors_;
         history_casts_.Push({rows_[ray_index], cols_[ray_index]});
 
@@ -305,7 +305,7 @@ public:
     }
     
     // 4 * Number of items
-    void Reduce() {
+    void Reduce() override {
         auto& offset = *buffer_;
         offset.resize(neighbors_.size());
         auto cur = 0;
@@ -387,8 +387,12 @@ public:
         return hash_.hash();
     }
     
-    Count EmptySpace() const {
+    Count EmptySpace() const override {
         return empty_space_;
+    }
+
+    Count TotalSpace() const override {
+        return neighbors_.size();
     }
     
     Count FilledSpace() const {

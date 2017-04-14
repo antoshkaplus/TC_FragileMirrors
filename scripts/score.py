@@ -32,13 +32,11 @@ def worker(i):
     lines = s.split("\n")
     for ln in lines:
         if ln.startswith(SCORE_START):
-            return (i, ln[len(SCORE_START):])
+            return ln[len(SCORE_START):]
 
 pool = Pool(cpu_count())
 result = pool.map(worker, (i for i in range(TEST_COUNT)))
-result = [result[i][1] for i in range(TEST_COUNT)]
 
-result.sort(key=lambda x: x[0])
 with open("../scores/" + VERSION + ".txt", "w") as out:
     out.write(str(len(result)) + "\n")
     for index, score in enumerate(result):

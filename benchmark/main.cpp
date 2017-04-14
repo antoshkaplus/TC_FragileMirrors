@@ -5,6 +5,7 @@
 
 
 int main(int argc, char** argv) {
+    // ./run_benchmarks.x   --benchmark_filter=BM_memcpy/32
     benchmark::Initialize(&argc, argv);
     benchmark::RunSpecifiedBenchmarks();
 }

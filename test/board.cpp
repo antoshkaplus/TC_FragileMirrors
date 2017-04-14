@@ -11,6 +11,7 @@
 #include "cast_history.hpp"
 #include "naive_search.hpp"
 #include "beam_search.hpp"
+#include "beam_search_new.hpp"
 #include "score.hpp"
 
 
@@ -173,3 +174,33 @@ TEST_F(SearchTest, BeamSameResultAllBoards) {
     }
 }
 
+TEST_F(SearchTest, ReduceSameResultAllBoards) {
+    b_1 = beamSolve(b_1);
+    b_1.set_reduce_empty_ratio(0.25);
+    b_2 = beamSolve(b_2);
+    b_2.set_reduce_empty_ratio(0.5);
+    b_3 = beamSolve(b_3);
+    b_3.set_reduce_empty_ratio(0.75);
+    b_4 = beamSolve(b_4);
+    b_4.set_reduce_empty_ratio(1.);
+
+    auto casts = b_1.CastHistory();
+    for (auto b_ptr : bs) {
+        ASSERT_EQ(casts, b_ptr->CastHistory());
+    }
+}
+
+TEST(BeamSearchNew, Functional) {
+    auto str_board = GenerateStringBoard(50);
+    Board_v6 b = str_board;
+    BeamSearchNew<Board_v6> s;
+    s.set_beam_width(100);
+    s.set_millis(5000);
+    b = s.Destroy(b);
+    auto history = b.CastHistory();
+    Board_v1_Impl_1<CastHistory_Nodes> s_check = str_board;
+    for_each(history.begin(), history.end(), [&](const Position& p) {
+        s_check.Cast(p);
+    });
+    ASSERT_TRUE(s_check.AllDestroyed());
+}

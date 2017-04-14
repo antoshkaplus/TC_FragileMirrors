@@ -59,6 +59,10 @@ target_link_libraries(psyho fragmir)
 add_executable(eldidou "app/main_template.cpp" "others/eldidou.cpp")
 target_link_libraries(eldidou fragmir)
 
+add_executable(version_v1 "app/main_template.cpp" "submit/version_v1.cpp")
+target_link_libraries(version_v1 fragmir)
+target_compile_options(version_v1 PRIVATE "-Wno-unused-function")
+
 find_library(GTEST_LIBRARY gtest)
 
 # tests

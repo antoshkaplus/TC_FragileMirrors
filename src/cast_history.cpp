@@ -17,3 +17,32 @@ vector<Position> ToVector(const CastHistory_Nodes& history) {
     reverse(casts.begin(), casts.end());
     return casts;
 }
+
+
+
+template<class Func>
+static void ForEach(const CastHistory_Nodes_v2& history, Func func) {
+    auto node = history.history_.get();
+    while (node != nullptr) {
+        func(node->value);
+        node = node->previous.get();
+    }
+}
+
+vector<short> ToRayVector(const CastHistory_Nodes_v2& history) {
+    vector<short> casts;
+    ForEach(history, [&](const auto& val){
+        casts.push_back(val.ray_index);
+    });
+    reverse(casts.begin(), casts.end());
+    return casts;
+}
+
+vector<Position> ToVector(const CastHistory_Nodes_v2& history) {
+    vector<Position> casts;
+    ForEach(history, [&](const auto& val){
+        casts.push_back(val.pos);
+    });
+    reverse(casts.begin(), casts.end());
+    return casts;
+}
