@@ -21,8 +21,8 @@ class BeamSearchNew {
     using ScoreType = Score_v1;
     using CastType = typename Board::CastType;
 
-    using Derivative = Derivative<Board>;
-    using LevelDerivatives = LevelDerivatives<Derivative>;
+    using Derivative_ = Derivative<Board>;
+    using LevelDerivatives_ = LevelDerivatives<Derivative_>;
 
 public:
     Board Destroy(const Board& b) {
@@ -121,9 +121,9 @@ private:
     }
 
 	// should we put it in another data structure???
-	void UpdateScoreStatsWithLevelPromotion(int level, const vector<Derivative>& derivs) {
+	void UpdateScoreStatsWithLevelPromotion(int level, const vector<Derivative_>& derivs) {
 		auto& stats = level_score_stats_[level];
-		auto score_functor = [](const Derivative& d) {return d.score;};
+		auto score_functor = [](const Derivative_& d) {return d.score;};
 		stats.min = min(stats.min, MinElement(derivs.begin(), derivs.end(), score_functor)->score);
 		stats.max = max(stats.max, MaxElement(derivs.begin(), derivs.end(), score_functor)->score);
 	}
@@ -153,13 +153,13 @@ private:
 		level_derivs_[level].PushAll(derivs);
 	}
 
-    vector<Derivative> ComputeBoardDerivatives(Board b) {
-        vector<Derivative> res;
+    vector<Derivative_> ComputeBoardDerivatives(Board b) {
+        vector<Derivative_> res;
         auto b_ptr = make_shared<Board>(b);
         b.ForEachAppliedCast([&](CastType cast){
             // if cast is empty, board has to be discovered
             if (discovery_.Discover(b)) {
-                Derivative st(b_ptr, cast, score_(b), b.hash());
+                Derivative_ st(b_ptr, cast, score_(b), b.hash());
                 res.push_back(st);
             }
             // somewhere we have to check if it's finish and if yes we should reduce number of levels
@@ -182,7 +182,7 @@ private:
 	};
 
 	// after we do the cast we come to the level
-    vector<LevelDerivatives> level_derivs_;
+    vector<LevelDerivatives_> level_derivs_;
     vector<ScoreStats> level_score_stats_;
     vector<Count> level_derivs_used_;
 	int promotion_count_;

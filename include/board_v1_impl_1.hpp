@@ -279,11 +279,11 @@ private:
                 switch (dir) {
                     case kDirRight:
                     case kDirLeft:
-                        return P{{p.row, ns[kDirOpposite[d = dir]]}, dir};
+                        return P{{p.row, ns[kDirOpposite[d = dir]]}, (char)dir};
                         break;
                     case kDirUp:
                     case kDirDown:
-                        return P{{ns[kDirOpposite[d = dir]], p.col}, dir};
+                        return P{{ns[kDirOpposite[d = dir]], p.col}, (char)dir};
                         break;
                     default: assert(false);
                 }
