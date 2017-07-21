@@ -72,6 +72,10 @@ add_executable(version_v1 "app/main_template.cpp" "submit/version_v1.cpp")
 target_link_libraries(version_v1 fragmir)
 target_compile_options(version_v1 PRIVATE "-Wno-unused-function")
 
+add_executable(version_v2 "app/main_template.cpp" "submit/version_v2.cpp")
+target_link_libraries(version_v2 fragmir)
+target_compile_options(version_v2 PRIVATE "-Wno-unused-function")
+
 add_executable(bs_new app/main_template.cpp app/bs_new.cpp)
 target_link_libraries(bs_new fragmir)
 

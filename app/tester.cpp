@@ -32,9 +32,11 @@ int main(int argc, const char * argv[]) {
 //    BeamSearchHistory<decltype(b), decltype(s)> solver;
 //    BeamSearchNew<Board_v6> solver;
 //    solver.set_millis(10000);
+    int maxProblemSize = 400 * 100 * 100 * 4 * 100;
+    int initWidth = maxProblemSize / (4*board.size()*board.size()*board.size());
     BeamSearchBalanced<Board_v6, Score_v1> solver;
-    solver.set_beam_width(1000);
-    solver.set_time(std::chrono::seconds(1000));
+    solver.set_time(std::chrono::seconds(100));
+    solver.set_beam_width(initWidth);
     //solver.set_score(s);
     auto w = solver.Destroy(board);
     //LevelScoreDiff(solver, b, w);

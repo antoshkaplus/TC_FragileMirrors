@@ -5,6 +5,55 @@
 #include "score.hpp"
 
 
+template<class BoardType>
+struct Balancer_1 {
+
+    Balancer_1(int bSize, int beamWidth) {
+
+    }
+
+private:
+    int computeLayerProblemSize(const vector<BoardType>& bs) {
+        return accumulate(bs.begin(), bs.end(), 0, [](int s, const BoardType& b) {
+            return s + b.MirrorsLeft();
+        });
+    }
+
+public:
+
+    int nextBeamWidth(const vector<BoardType>& curBs, int allowedSize) {
+        double aveSize = computeLayerProblemSize(curBs) / curBs.size();
+        return allowedSize / aveSize;
+    }
+
+};
+
+template<class BoardType>
+struct Balancer_2 {
+
+    Balancer_2(int bSize, int beamWidth) {
+        initialTotal = beamWidth * bSize * bSize*4;
+    }
+
+private:
+    int compute(const BoardType& b) {
+        return b.RayCount() * sqrt(b.MirrorsLeft());
+    }
+
+    int computeCurrentTotal(const vector<BoardType>& bs) {
+        return accumulate(bs.begin(), bs.end(), 0, [&](int init, const BoardType& b) {
+            return init + compute(b);
+        });
+    }
+
+public:
+    int nextBeamWidth(const vector<BoardType>& bs) {
+        return initialTotal * bs.size() / computeCurrentTotal(bs);
+    }
+
+private:
+    int initialTotal;
+};
 // has to keep ScoreType as template parameter to support
 // score functions that require specific board class as argument
 template<class BoardType, class ScoreType>
@@ -30,21 +79,12 @@ class BeamSearchBalanced {
         }
     };
 
+
 public:
 
-    int computeLayerProblemSize(const vector<BoardType>& bs) {
-        return accumulate(bs.begin(), bs.end(), 0, [](int s, const BoardType& b) {
-            return s + b.MirrorsLeft();
-        });
-    }
-
-    int computeNextLayerWidth(const vector<BoardType>& curBs, int allowedSize) {
-        double aveSize = computeLayerProblemSize(curBs) / curBs.size();
-        return allowedSize / aveSize;
-    }
 
     BoardType Destroy(const BoardType& b_in) {
-        int allowedSize = beam_width_ * b_in.MirrorsLeft();
+        Balancer_2<Board_v6> balancer(b_in.size(), beam_width_);
 
         unordered_set<HashType> visited;
         vector<Derivative> derivs;
@@ -72,7 +112,7 @@ public:
             }
 
             // time to pick amount for the next layer
-            Count sz = min<Count>(min<Count>(computeNextLayerWidth(*cur, allowedSize), derivs.size()), );
+            Count sz = min<Count>(balancer.nextBeamWidth(*cur), derivs.size());
             nth_element(derivs.begin(), derivs.begin()+sz-1, derivs.end());
             derivs.resize(sz);
             next->resize(sz);
