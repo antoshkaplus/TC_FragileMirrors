@@ -20,6 +20,7 @@
 #include <type_traits>
 #include <tuple>
 #include <fstream>
+#include <chrono>
 
 
 #include "ant/grid/grid.hpp"
@@ -89,7 +90,7 @@ struct CastNode {
     CastNode(const Position& cast, const shared_ptr<CastNode>& previous)
     : cast{cast}, previous{previous} {}
     
-    static Count Count(shared_ptr<CastNode> node) {
+    static ant::Count Count(shared_ptr<CastNode> node) {
         ant::Count count = 0;
         while (node) {
             ++count;
@@ -112,6 +113,9 @@ struct CastNode {
     Position cast;
     shared_ptr<CastNode> previous;
 };
+
+
+
 
 const constexpr char kMirRight     = 0;
 const constexpr char kMirLeft      = 1;

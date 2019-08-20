@@ -21,7 +21,7 @@ class NaiveSearch {
 public:
     Board Destroy(const Board& b_in, Score& s) {
         Board bb(b_in);
-        C best_cast;
+        C best_cast{};
         double score, best_score = numeric_limits<double>::min();
         while (!bb.AllDestroyed()) {
             auto func = [&](auto cast) {

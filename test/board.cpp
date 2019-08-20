@@ -11,7 +11,7 @@
 #include "cast_history.hpp"
 #include "naive_search.hpp"
 #include "beam_search.hpp"
-#include "beam_search_new.hpp"
+#include "bs_new.hpp"
 #include "score.hpp"
 
 

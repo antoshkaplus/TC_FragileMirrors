@@ -51,15 +51,11 @@ int main(int argc, const char * argv[]) {
 
     vector<string> board = ReadBoard(*in);
     
-    auto startTime = std::chrono::high_resolution_clock::now();
+    Timer timer(10000);
     FragileMirrors fm;
     auto v = fm.destroy(board);
-    auto endTime = std::chrono::high_resolution_clock::now();
-    if (timed) {
-        auto bound = std::chrono::seconds(10);
-        if (endTime - startTime > bound) {
-            return 0;
-        }
+    if (timed && timer.timeout()) {
+        return 0;
     }
     PrintSolution(*out, v);
     return 0;

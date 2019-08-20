@@ -91,7 +91,8 @@ public:
     Board_v6(const vector<string>& str_board) : board_size_(str_board.size()),
                                                 hash_(board_size_) {
         mirrors_destroyed_ = 0;
-        empty_lines_count_ = 0;
+        empty_row_count_ = 0;
+        empty_col_count_ = 0;
         
         filled_space_ = str_board.size()*str_board.size();
         empty_space_ = 0;
@@ -255,12 +256,12 @@ public:
     
     void Destroy(char row, char col) {
         if (--mirrors_left_[kOrientHor][col] == 0) {
-            ++empty_lines_count_;
+            ++empty_row_count_;
             // empty is not counted as even?????
         } 
         
         if (--mirrors_left_[kOrientVer][row] == 0) {
-            ++empty_lines_count_;
+            ++empty_col_count_;
         }
         hash_.HashOut({row, col});
     }
@@ -275,10 +276,10 @@ public:
     
     void Restore(char row, char col) {
         if (++mirrors_left_[kOrientHor][col] == 1) {
-            --empty_lines_count_;
+            --empty_row_count_;
         }         
         if (++mirrors_left_[kOrientVer][row] == 1) {
-            --empty_lines_count_;
+            --empty_col_count_;
         } 
         hash_.HashIn({row, col});
     }
@@ -349,7 +350,7 @@ public:
     }
     
     bool AllDestroyed() const override {
-        return empty_lines_count_ == 2 * board_size_;
+        return EmptyLinesCount() == 2 * board_size_;
     }
     
     Count size() const override {
@@ -365,7 +366,15 @@ public:
     }
     
     Count EmptyLinesCount() const override {
-        return empty_lines_count_;
+        return EmptyColCount() + EmptyRowCount();
+    }
+
+    Count EmptyRowCount() const {
+        return empty_row_count_;
+    }
+
+    Count EmptyColCount() const {
+        return empty_col_count_;
     }
     
     HashType hash() const override {
@@ -420,7 +429,8 @@ private:
 
     Count board_size_;
     Count mirrors_destroyed_;
-    Count empty_lines_count_;
+    Count empty_row_count_;
+    Count empty_col_count_;
 
     Count filled_space_;
     Count empty_space_;

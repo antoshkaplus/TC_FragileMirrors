@@ -10,13 +10,13 @@
 
 #include "util.hpp"
 
-#ifdef DEBUG
+#ifdef RNG
 
-default_random_engine RNG;
+default_random_engine RNG(std::chrono::system_clock::now().time_since_epoch().count());
 
 #else
 
-default_random_engine RNG(std::chrono::system_clock::now().time_since_epoch().count());
+default_random_engine RNG;
 
 #endif
 

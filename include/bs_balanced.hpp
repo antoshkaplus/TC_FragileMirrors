@@ -1,10 +1,3 @@
-//
-//  beam_search.hpp
-//  FragileMirrors
-//
-//  Created by Anton Logunov on 6/8/15.
-//
-//
 #pragma once
 
 #include "util.hpp"
@@ -12,15 +5,64 @@
 #include "score.hpp"
 
 
+template<class BoardType>
+struct Balancer_1 {
+
+    Balancer_1(int bSize, int beamWidth) {
+
+    }
+
+private:
+    int computeLayerProblemSize(const vector<BoardType>& bs) {
+        return accumulate(bs.begin(), bs.end(), 0, [](int s, const BoardType& b) {
+            return s + b.MirrorsLeft();
+        });
+    }
+
+public:
+
+    int nextBeamWidth(const vector<BoardType>& curBs, int allowedSize) {
+        double aveSize = computeLayerProblemSize(curBs) / curBs.size();
+        return allowedSize / aveSize;
+    }
+
+};
+
+template<class BoardType>
+struct Balancer_2 {
+
+    Balancer_2(int bSize, int beamWidth) {
+        initialTotal = beamWidth * bSize * bSize*4;
+    }
+
+private:
+    int compute(const BoardType& b) {
+        return b.RayCount() * sqrt(b.MirrorsLeft());
+    }
+
+    int computeCurrentTotal(const vector<BoardType>& bs) {
+        return accumulate(bs.begin(), bs.end(), 0, [&](int init, const BoardType& b) {
+            return init + compute(b);
+        });
+    }
+
+public:
+    int nextBeamWidth(const vector<BoardType>& bs) {
+        return initialTotal * bs.size() / computeCurrentTotal(bs);
+    }
+
+private:
+    int initialTotal;
+};
 // has to keep ScoreType as template parameter to support
 // score functions that require specific board class as argument
 template<class BoardType, class ScoreType>
-class BeamSearch {
+class BeamSearchBalanced {
 
     using HashType = typename BoardType::HashType;
     using CastType = typename BoardType::CastType;
-    
-    /// can make use of more parametered possibly 
+
+    /// can make use of more parametered possibly
     struct Derivative {
         Derivative() {}
         Derivative(BoardType* b, const CastType& p, HashType h, double s)
@@ -30,16 +72,20 @@ class BeamSearch {
         CastType cast;
         HashType hash;
         double score;
-        
+
         /// want to sort in reverse order
         bool operator<(const Derivative& d) const {
             return score > d.score;
         }
     };
 
+
 public:
 
+
     BoardType Destroy(const BoardType& b_in) {
+        Balancer_2<Board_v6> balancer(b_in.size(), beam_width_);
+
         unordered_set<HashType> visited;
         vector<Derivative> derivs;
         vector<BoardType> b_0;
@@ -49,7 +95,7 @@ public:
         Count side_count = 4;
         derivs.reserve(beam_width_*side_count*b_in.size());
         auto cur = &b_0;
-        auto next = &b_1; 
+        auto next = &b_1;
         cur->push_back(b_in);
         Timer timer{std::chrono::duration_cast<std::chrono::milliseconds>(time_).count()};
         while (!timer.timeout()) {
@@ -64,7 +110,9 @@ public:
                 };
                 b.ForEachAppliedCast(func);
             }
-            Count sz = min<Count>(beam_width_, derivs.size());
+
+            // time to pick amount for the next layer
+            Count sz = min<Count>(balancer.nextBeamWidth(*cur), derivs.size());
             nth_element(derivs.begin(), derivs.begin()+sz-1, derivs.end());
             derivs.resize(sz);
             next->resize(sz);
@@ -77,7 +125,7 @@ public:
                 return b_0.MirrorsDestroyed() < b_1.MirrorsDestroyed();
             });
             if (rr->AllDestroyed()) {
-                return *rr;   
+                return *rr;
             }
             /// cleanup before next step
             next->clear();

@@ -9,7 +9,7 @@ class CastHistory {
 public:
     virtual void Push(const Position& p) = 0;
     virtual void Pop() = 0;
-    virtual Count Count() const = 0;
+    virtual ant::Count Count() const = 0;
 };
 
 
@@ -28,7 +28,7 @@ public:
         history_.pop_back();
     }
 
-    ::Count Count() const override {
+    ant::Count Count() const override {
         return history_.size();
     }
 
