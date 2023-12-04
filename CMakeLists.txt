@@ -5,7 +5,7 @@
 cmake_minimum_required (VERSION 3.2)
 project (FragileMirrors)
 
-list(APPEND CMAKE_CXX_FLAGS " -std=c++1z -Werror -Wall -Wno-narrowing -Wno-parentheses -Wno-char-subscripts -Wno-unused-const-variable -Wno-unused-but-set-variable -Wno-sign-compare")
+list(APPEND CMAKE_CXX_FLAGS " -std=c++23 -Werror -Wall -Wno-narrowing -Wno-parentheses -Wno-char-subscripts -Wno-unused-const-variable -Wno-unused-but-set-variable -Wno-sign-compare")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
     list(APPEND CMAKE_CXX_FLAGS -stdlib=libc++)
 endif()
@@ -57,7 +57,7 @@ target_link_libraries(bs_best_width fragmir)
 # solution from other people
 # need fragmir for helper functions
 add_executable(colun "app/main_template.cpp" "others/colun.cpp")
-target_link_libraries(colun fragmir)
+target_link_libraries(colun boost_program_options)
 
 add_executable(chokudai "app/main_template.cpp" "others/chokudai.cpp")
 target_link_libraries(chokudai fragmir)
@@ -66,15 +66,14 @@ add_executable(psyho "app/main_template.cpp" "others/psyho.cpp")
 target_link_libraries(psyho fragmir)
 
 add_executable(eldidou "app/main_template.cpp" "others/eldidou.cpp")
-target_link_libraries(eldidou fragmir)
+target_link_libraries(eldidou boost_program_options)
 
-add_executable(version_v1 "app/main_template.cpp" "submit/version_v1.cpp")
-target_link_libraries(version_v1 fragmir)
-target_compile_options(version_v1 PRIVATE "-Wno-unused-function")
+# My solutions
+add_executable(solv_greedy_i1 app/main_template.cpp app/solver/greedy_i1.cpp)
+target_link_libraries(solv_greedy_i1 boost_program_options)
 
-add_executable(version_v2 "app/main_template.cpp" "submit/version_v2.cpp")
-target_link_libraries(version_v2 fragmir)
-target_compile_options(version_v2 PRIVATE "-Wno-unused-function")
+add_executable(solv_bs_greedy_i1 app/main_template.cpp app/solver/bs_greedy_i1.cpp)
+target_link_libraries(solv_bs_greedy_i1 boost_program_options)
 
 add_executable(bs_new app/main_template.cpp app/bs_new.cpp)
 target_link_libraries(bs_new fragmir)

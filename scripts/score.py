@@ -1,10 +1,8 @@
-
 import sys
-import os
 import subprocess as sp
 from multiprocessing import cpu_count
 from multiprocessing import Pool
-from optparse import OptionParser
+import argparse
 
 
 SCORE_START = "Score  = "
@@ -14,36 +12,31 @@ VERSION = None
 CPU_COUNT = cpu_count()
 if CPU_COUNT > 2: CPU_COUNT-= 2
 
-parser = OptionParser(usage="usage: %prog --version=%executable [--test-count=%count] [--cpu=%cpu_count]")
-parser.add_option("--test-count", dest="test_count")
-parser.add_option("--version", dest="version")
-parser.add_option("--cpu", dest="cpu_count")
+parser = argparse.ArgumentParser()
+parser.add_argument("version")
+parser.add_argument("--test-count", type=int, default=100)
+parser.add_argument("--cpu", dest='cpu_count', type=int, default=CPU_COUNT)
 
-(options, args) = parser.parse_args()
+args, others = parser.parse_known_args()
 
-if options.test_count:
-    TEST_COUNT = int(options.test_count)
-
-if options.version:
-    VERSION = options.version
-else:
-    parser.error("version not specified")
-
-if options.cpu_count:
-    CPU_COUNT = int(options.cpu_count)
+TEST_COUNT = args.test_count
+VERSION = args.version
+CPU_COUNT = args.cpu_count
 
 def worker(i):
-    print "start seed: " + str(i)
-    command = ["java", "-jar", "FragileMirrorsVis.jar", "-exec", "../bin/" + VERSION + " -d", "-novis", "-seed", str(i)]
-    s = sp.check_output(command)
+    print("start seed: ", i)
+    command = ["java", "-jar", "scripts/FragileMirrorsVis.jar", "-exec", f"./bin/{VERSION} {' '.join(others)}", "-novis", "-seed", str(i)]
+    s = sp.check_output(command).decode(sys.stdout.encoding)
     lines = s.split("\n")
     for ln in lines:
         if ln.startswith(SCORE_START):
             return ln[len(SCORE_START):]
 
+
 pool = Pool(CPU_COUNT)
-result = pool.map(worker, (i for i in range(TEST_COUNT)))
-with open("../scores/" + VERSION + ".txt", "w") as out:
+# Do not use zero seed - messes up random generator of the runner.
+result = pool.map(worker, (i for i in range(1, TEST_COUNT+1)))
+with open(f"./scores/{VERSION}_{TEST_COUNT}.txt", "w") as out:
     out.write(str(len(result)) + "\n")
     for index, score in enumerate(result):
-        out.write(str(index) + "," + score + "\n")
+        out.write(f'{index},{round(float(score),3)}\n')

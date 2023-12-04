@@ -1,15 +1,5 @@
-//
-//  board.h
-//  FragileMirrors
-//
-//  Created by Anton Logunov on 5/7/14.
-//  Copyright (c) 2014 Anton Logunov. All rights reserved.
-//
-
 #pragma once
-
 #include <ant/core/core.hpp>
-
 #include "util.hpp"
 
 
@@ -36,7 +26,7 @@ public:
 
     virtual unique_ptr<Board> Clone() const = 0;
 
-    virtual ~Board() {}
+    virtual ~Board() = default;
 };
 
 
@@ -59,7 +49,7 @@ public:
         }
     }
 
-    virtual ~Board_v1() {}
+    virtual ~Board_v1() = default;
 };
 
 
@@ -81,7 +71,7 @@ public:
         }
     }
 
-    virtual ~Board_v2() {}
+    virtual ~Board_v2() = default;
 };
 
 class Board_v2_Reduce : public Board_v2 {
