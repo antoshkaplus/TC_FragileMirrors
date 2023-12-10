@@ -1,11 +1,23 @@
 #pragma once
 #include <vector>
-#include "common/types.hpp"
-#include "common/position.hpp"
-#include "common/grid.hpp"
+#include <chrono>
+#include "mirrors/common/types.hpp"
+#include "mirrors/common/position.hpp"
+#include "mirrors/common/grid.hpp"
 
 
 namespace mirrors {
+
+//inline std::vector<std::string> GenerateStringBoard(int sz, rng_t& rng) {
+//    std::discrete_distribution<int> distr{0.5, 0.5};
+//    std::vector<std::string> strBoard(sz);
+//    for (int i = 0; i < sz; i++) {
+//        for (int j = 0; j < sz; j++) {
+//            strBoard[i].push_back(distr(rng) == 0 ? 'R' : 'L');
+//        }
+//    }
+//    return strBoard;
+//}
 
 inline std::vector<std::string> ReadBoard(std::istream& cin) {
     int n;

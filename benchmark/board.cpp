@@ -1,7 +1,7 @@
 //
 // Created by Anton Logunov on 4/11/17.
 //
-#include "benchmark/benchmark_api.h"
+#include "benchmark/benchmark.h"
 
 #include "beam_search.hpp"
 #include "board_v2_impl_1.hpp"

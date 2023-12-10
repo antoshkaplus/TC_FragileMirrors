@@ -1,8 +1,8 @@
 #include <iostream>
 #include <fstream>
 #include <boost/program_options.hpp>
-#include "common/timer.hpp"
-#include "common/solver_util.hpp"
+#include "mirrors/common/timer.hpp"
+#include "mirrors/common/solver_util.hpp"
 #include "fragile_mirrors.hpp"
 
 
@@ -30,7 +30,9 @@ int main(int argc, const char * argv[]) {
     po::store(parsed_options, vm);
     po::notify(vm);
 
-    std::vector<std::string> other_cmd_args = po::collect_unrecognized(parsed_options.options, po::exclude_positional);
+    // To parse other arguments properly must `include_positional`.
+    // Also before parsing should not forget to add the first argument: program name.
+    std::vector<std::string> other_cmd_args = po::collect_unrecognized(parsed_options.options, po::include_positional);
 
     bool timed = false;
     if (vm.contains("timed")) {

@@ -3,8 +3,9 @@
 #include <bitset>
 #include <random>
 #include <algorithm>
-#include "common/grid.hpp"
-#include "common/types.hpp"
+#include "mirrors/common/grid.hpp"
+#include "mirrors/common/types.hpp"
+#include "mirrors/common/rng.hpp"
 
 
 namespace mirrors {
@@ -17,9 +18,8 @@ struct ZobristHashing {
             : hash_table_(board_size) {
         // will use 0 for nothing
         std::uniform_int_distribution<hash_value_t> distr(1);
-        std::default_random_engine rng;
         std::generate(hash_table_.begin(), hash_table_.end(),
-                      [&]() {return distr(rng);});
+                      [&]() {return distr(RNG);});
     }
 
     // When you destroy a mirror call it.

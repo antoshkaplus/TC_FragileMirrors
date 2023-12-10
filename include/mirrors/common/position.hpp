@@ -1,6 +1,6 @@
 #pragma once
 #include <iostream>
-#include "common/types.hpp"
+#include "mirrors/common/types.hpp"
 
 namespace mirrors {
 

@@ -36,14 +36,6 @@ public:
     }
 };
 
-template<class Board>
-class Score_Psyho {
-public:
-    double operator()(const Board& b) const {
-        return b.MirrorsDestroyed() + (b.EmptyRowCount()+1)/(b.EmptyColCount()+1) * 8;
-    }
-};
-
 
 class InterLevelScoreFunctor : public Score {
 

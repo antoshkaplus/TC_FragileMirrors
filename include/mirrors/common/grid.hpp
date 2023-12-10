@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include "common/position.hpp"
+#include "mirrors/common/position.hpp"
 
 
 namespace mirrors {

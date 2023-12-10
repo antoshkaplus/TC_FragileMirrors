@@ -2,7 +2,7 @@
 #include <vector>
 #include <unordered_set>
 #include <map>
-#include "board/board_i2.hpp"
+#include "mirrors/board/board_i2.hpp"
 
 
 namespace mirrors::solver {
@@ -45,7 +45,6 @@ public:
                 next_boards.emplace(destroyed, std::move(cast_board));
             }
         });
-
     }
 
 private:

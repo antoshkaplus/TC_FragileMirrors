@@ -1,6 +1,6 @@
 #pragma once
-#include "common/position.hpp"
-#include "grid.hpp"
+#include "mirrors/common/position.hpp"
+#include "mirrors/common/grid.hpp"
 
 
 namespace mirrors {
