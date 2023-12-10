@@ -24,4 +24,4 @@ for f_name in filenames:
         result.append((base, total_score))
 result.sort(key=lambda x: x[1], reverse=True)
 for name, score in result:
-    print(name, ":", score)
+    print(name, ":", round(score, 4))

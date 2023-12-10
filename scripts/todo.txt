@@ -1,3 +1,0 @@
-
-1) better heuristic
-3) need eventually to get beam search that is more or less similar to best first search

@@ -5,13 +5,17 @@
 cmake_minimum_required (VERSION 3.2)
 project (FragileMirrors)
 
-list(APPEND CMAKE_CXX_FLAGS " -std=c++23 -Werror -Wall -Wno-narrowing -Wno-parentheses -Wno-char-subscripts -Wno-unused-const-variable -Wno-unused-but-set-variable -Wno-sign-compare")
+string(APPEND CMAKE_CXX_FLAGS " -std=c++23 -Werror -Wall -Wno-narrowing -Wno-parentheses -Wno-char-subscripts"
+                            " -Wno-unused-const-variable -Wno-unused-but-set-variable -Wno-sign-compare"
+                            " -Wno-delete-non-virtual-dtor")
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-    list(APPEND CMAKE_CXX_FLAGS -stdlib=libc++)
+    string(APPEND CMAKE_CXX_FLAGS -stdlib=libc++)
 endif()
 
 set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} ")
-set(CMAKE_CXX_FLAGS_RELEASE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 ")
+# set before adding more options to RELEASE
+set(CMAKE_CXX_FLAGS_FAST " ${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
+set(CMAKE_CXX_FLAGS_RELEASE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native")
 
 
 set(BinDir ${PROJECT_SOURCE_DIR}/bin)
@@ -31,6 +35,7 @@ endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 file(GLOB SOURCE_FILES "./src/*.cpp")
 file(GLOB HEADER_FILES "./include/*.h" "./include/*.hpp")
+set(RNG_FILE ${CMAKE_SOURCE_DIR}/src/mirrors/common/rng.cpp)
 
 include_directories("./include")
 include_directories("/usr/local/include")
@@ -44,7 +49,10 @@ endif()
 add_library(fragmir ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(fragmir ${ANT_LIBRARY})
 
-add_executable(solver "app/main_template.cpp" "app/solver.cpp")
+add_subdirectory(app/solver)
+add_subdirectory(app/measure)
+
+add_executable(solver "app/solver/main_template.cpp" "app/solver.cpp")
 target_link_libraries(solver fragmir ant)
 
 # quick run to see result of the change
@@ -54,34 +62,13 @@ target_link_libraries(tester fragmir)
 add_executable(bs_best_width app/bs_best_width.cpp)
 target_link_libraries(bs_best_width fragmir)
 
-# solution from other people
-# need fragmir for helper functions
-add_executable(colun "app/main_template.cpp" "others/colun.cpp")
-target_link_libraries(colun boost_program_options)
-
-add_executable(chokudai "app/main_template.cpp" "others/chokudai.cpp")
-target_link_libraries(chokudai fragmir)
-
-add_executable(psyho "app/main_template.cpp" "others/psyho.cpp")
-target_link_libraries(psyho fragmir)
-
-add_executable(eldidou "app/main_template.cpp" "others/eldidou.cpp")
-target_link_libraries(eldidou boost_program_options)
-
-# My solutions
-add_executable(solv_greedy_i1 app/main_template.cpp app/solver/greedy_i1.cpp)
-target_link_libraries(solv_greedy_i1 boost_program_options)
-
-add_executable(solv_bs_greedy_i1 app/main_template.cpp app/solver/bs_greedy_i1.cpp)
-target_link_libraries(solv_bs_greedy_i1 boost_program_options)
-
-add_executable(bs_new app/main_template.cpp app/bs_new.cpp)
+add_executable(bs_new app/solver/main_template.cpp app/bs_new.cpp)
 target_link_libraries(bs_new fragmir)
 
-add_executable(bs app/main_template.cpp app/bs.cpp)
+add_executable(bs app/solver/main_template.cpp app/bs.cpp)
 target_link_libraries(bs fragmir)
 
-add_executable(bs_balanced "app/main_template.cpp" "app/bs_balanced.cpp")
+add_executable(bs_balanced "app/solver/main_template.cpp" "app/bs_balanced.cpp")
 target_link_libraries(bs_balanced fragmir)
 
 

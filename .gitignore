@@ -8,6 +8,7 @@
 
 cmake-build-debug/
 cmake-build-release/
+cmake-build-fast/
 
 build*
 .DS_Store
@@ -20,4 +21,5 @@ CMakeCache.txt
 CMakeFiles
 
 scores/
+data/db.db
 

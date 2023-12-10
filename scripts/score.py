@@ -3,6 +3,7 @@ import subprocess as sp
 from multiprocessing import cpu_count
 from multiprocessing import Pool
 import argparse
+import time
 
 
 SCORE_START = "Score  = "
@@ -33,9 +34,19 @@ def worker(i):
             return ln[len(SCORE_START):]
 
 
+class Timer:
+    def __enter__(self):
+        self.enter_time = time.perf_counter()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        period = time.perf_counter() - self.enter_time
+        print(f'Time spent: {period:0.2f} sec.')
+
+
 pool = Pool(CPU_COUNT)
-# Do not use zero seed - messes up random generator of the runner.
-result = pool.map(worker, (i for i in range(1, TEST_COUNT+1)))
+with Timer():
+    # Do not use zero seed - messes up random generator of the runner.
+    result = pool.map(worker, (i for i in range(1, TEST_COUNT+1)))
 with open(f"./scores/{VERSION}_{TEST_COUNT}.txt", "w") as out:
     out.write(str(len(result)) + "\n")
     for index, score in enumerate(result):
