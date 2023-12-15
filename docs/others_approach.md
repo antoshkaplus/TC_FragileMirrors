@@ -28,7 +28,8 @@ Scoring function for each state :
 
 W0 = 8, W1 = 1, W2 = 2, W4 = 1, WP = 3 for even N, 7 for odd N.
 
-W0 is the single most important feature and it gave initially over 10 points. Changing WP from WP=4 to WP=3/7 gave me around 0.4. Adding W1,W2 and W4 gave a total of around 1 point.
+W0 is the single most important feature and it gave initially over 10 points. 
+Changing WP from WP=4 to WP=3/7 gave me around 0.4. Adding W1,W2 and W4 gave a total of around 1 point.
 
 ## Simulation:
 For each cell I remember the closest mirror in each direction (or edge in case there's no mirror).
