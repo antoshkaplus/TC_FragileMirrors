@@ -1,16 +1,18 @@
 #pragma once
 #include <vector>
+#include <ranges>
 #include <unordered_set>
 #include <map>
 #include "mirrors/board/board_i2.hpp"
 
 
-namespace mirrors::solver {
+namespace mirrors {
 
+// Traverse boards from best to worse. Should reduce number of inserts.
 template <class Board>
-class BS_Greedy_i1 {
+class BS_Greedy_i2 {
 public:
-    explicit BS_Greedy_i1(size_t beam_width) : beam_width(beam_width) {}
+    explicit BS_Greedy_i2(size_t beam_width) : beam_width(beam_width) {}
 
     const Board& best_board() const {
         return boards.rbegin()->second;
@@ -20,7 +22,7 @@ public:
         std::vector<Position> cast_history;
         boards.emplace(0, b);
         while (!best_board().AllDestroyed()) {
-            for (auto& item : boards) {
+            for (auto& item : std::views::reverse(boards)) {
                 AddNextBoards(item.second);
             }
             boards.clear();

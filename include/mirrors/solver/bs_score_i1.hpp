@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <ranges>
 #include <unordered_set>
 #include <set>
 #include "mirrors/score/less.hpp"
@@ -21,7 +22,6 @@ public:
     }
 
     std::vector<Position> Destroy(const Board& b) {
-        std::vector<Position> cast_history;
         boards.emplace(b);
         while (!best_board().AllDestroyed()) {
             for (auto& item : boards) {
