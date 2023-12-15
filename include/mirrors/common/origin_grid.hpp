@@ -20,6 +20,13 @@ public:
         return grid_(p.row - origin_.row, p.col - origin_.col);
     }
 
+    value_type& operator()(board_size_t row, board_size_t col) {
+        return grid_(row - origin_.row, col - origin_.col);
+    }
+    const value_type& operator()(board_size_t row, board_size_t col) const {
+        return grid_(row - origin_.row, col - origin_.col);
+    }
+
     value_type& operator[](const Position& p) {
         return grid_(p.row - origin_.row, p.col - origin_.col);
     }

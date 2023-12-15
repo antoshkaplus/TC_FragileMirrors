@@ -20,6 +20,9 @@ struct CastNode {
         return casts;
     }
 
+    static std::shared_ptr<CastNode> Push(std::shared_ptr<CastNode> node, CastType cast) {
+        return std::make_shared<CastNode>(cast, node);
+    }
 
     CastType cast;
     std::shared_ptr<CastNode> previous;

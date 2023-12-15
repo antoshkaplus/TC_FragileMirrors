@@ -9,6 +9,7 @@ namespace mirrors {
 using board_size_t = int8_t;
 using cell_count_t = int16_t;
 using hash_value_t = uint64_t;
+using dir_t = int8_t;
 
 
 enum class Direction : int8_t {
@@ -18,6 +19,12 @@ enum class Direction : int8_t {
     Right,
     Left,
 };
+
+// When implementing board with neighbour links array.
+const constexpr static dir_t kDirTop      = 0;
+const constexpr static dir_t kDirBottom   = 1;
+const constexpr static dir_t kDirLeft     = 2;
+const constexpr static dir_t kDirRight    = 3;
 
 enum class Mirror : int8_t {
     None,
@@ -50,12 +57,12 @@ inline std::ostream& operator<<(std::ostream& out, Mirror mirror) {
     return out;
 }
 
-constexpr char kLetterRightMirror = 'R';
-constexpr char kLetterLeftMirror = 'L';
-constexpr char kLetterDestroyedMirror = 'D';
+constexpr static char kLetterRightMirror = 'R';
+constexpr static char kLetterLeftMirror = 'L';
+constexpr static char kLetterDestroyedMirror = 'D';
 
-constexpr char kChRightMirror = '\\';
-constexpr char kChLeftMirror = '/';
+constexpr static char kChRightMirror = '\\';
+constexpr static char kChLeftMirror = '/';
 
 inline Mirror ConvertChMirrorToMirror(char mirror) {
     if (mirror == kChRightMirror) return Mirror::Right;

@@ -14,6 +14,7 @@ struct ZobristHashing {
     // will be just all zeros
     static constexpr hash_value_t NOTHING = 0;
 
+    ZobristHashing() = default;
     ZobristHashing(const board_size_t& board_size)
             : hash_table_(board_size) {
         // will use 0 for nothing
@@ -24,7 +25,7 @@ struct ZobristHashing {
 
     // When you destroy a mirror call it.
     // When you place it back call it too.
-    void xorState(hash_value_t* set, const Position& pos) {
+    void xorState(hash_value_t* set, const Position& pos) const {
         (*set) ^= hash_table_[pos];
     }
 
