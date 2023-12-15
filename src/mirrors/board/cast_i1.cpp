@@ -1,4 +1,4 @@
-#include "mirrors/board/cast_i1.hpp"
+#include "mirrors/board/board_i5_restore_cast.hpp"
 
 
-std::vector<mirrors::Restore> mirrors::Cast_i1::restore;
+std::vector<mirrors::Restore> mirrors::RestoreCast::restore;

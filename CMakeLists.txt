@@ -16,6 +16,7 @@ set(CMAKE_CXX_FLAGS_DEBUG " ${CMAKE_CXX_FLAGS_DEBUG} ")
 # set before adding more options to RELEASE
 set(CMAKE_CXX_FLAGS_FAST " ${CMAKE_CXX_FLAGS_RELEASE} -Ofast -march=native")
 set(CMAKE_CXX_FLAGS_RELEASE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native")
+set(CMAKE_CXX_FLAGS_PROFILE " ${CMAKE_CXX_FLAGS_RELEASE} -O3 -march=native -pg")
 
 
 set(BinDir ${PROJECT_SOURCE_DIR}/bin)
