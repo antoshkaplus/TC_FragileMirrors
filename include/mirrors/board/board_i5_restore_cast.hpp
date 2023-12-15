@@ -1,5 +1,7 @@
 #pragma once
+#include <ranges>
 #include "mirrors/board/board_i5.hpp"
+
 
 namespace mirrors {
 
@@ -9,23 +11,23 @@ struct Restore {
 };
 
 
-struct Cast_i1 {
-    Cast_i1(Board_i5 &board, const Position& pos) :
+struct RestoreCast {
+    RestoreCast(Board_i5 &board, const Position& pos) :
             board(board),
             old_hash_(board.hash()),
             old_empty_cols_(board.empty_cols()),
             old_empty_rows_(board.empty_rows()) {
 
         // TODO: try to reduce it
-        board.cast_node = std::make_shared<Board_i5::CastNode_>(pos,
-                                                               board.cast_node);
+        board.cast_node = Board_i5::CastNode_::Push(board.cast_node, pos);
         restore.clear();
         auto next = NextFromBorder(pos, board.size());
-        while (board.mirrors[next.pos] != Mirror::Border) {
-            auto new_next = NextFrom(next, board.mirrors[next.pos]);
-            if (board.mirrors[next.pos] != Mirror::Destroyed) {
-                restore.emplace_back(next.pos, board.mirrors[next.pos]);
-                board.mirrors[next.pos] = Mirror::Destroyed;
+        auto& mir = board.mirrors;
+        while (mir[next.pos] != Mirror::Border) {
+            auto new_next = NextFrom(next, mir[next.pos]);
+            if (mir[next.pos] != Mirror::Destroyed) {
+                restore.emplace_back(next.pos, mir[next.pos]);
+                mir[next.pos] = Mirror::Destroyed;
                 ++board.destroyed_count_;
                 OnMirrorDestroyed(next.pos);
             }
@@ -43,7 +45,7 @@ struct Cast_i1 {
         }
     }
 
-    ~Cast_i1() {
+    ~RestoreCast() {
         for (const auto& r: restore) {
             board.mirrors[r.pos] = r.mirror;
             ++board.col_mirror_count[r.pos.col];

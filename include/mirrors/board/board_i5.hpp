@@ -57,6 +57,10 @@ public:
         return mirrors.grid().size()-kBorderSize;
     }
 
+    cell_count_t cell_count() const {
+        return static_cast<cell_count_t>(size())*size();
+    }
+
     cell_count_t destroyed_count() const {
         return destroyed_count_;
     }
@@ -84,7 +88,8 @@ private:
     std::shared_ptr<ZobristHashing> hashing_;
     std::shared_ptr<CastNode_> cast_node {};
 
-    friend struct Cast_i1;
+    friend struct RestoreCast;
+    friend struct Cast;
 };
 
 }
