@@ -1,5 +1,5 @@
-#include "solver/greedy_i1.hpp"
-#include "common/solver_util.hpp"
+#include "mirrors/solver/greedy_i1.hpp"
+#include "mirrors/common/solver_util.hpp"
 #include "fragile_mirrors.hpp"
 
 

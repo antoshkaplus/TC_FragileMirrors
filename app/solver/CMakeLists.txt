@@ -8,8 +8,15 @@ target_link_libraries(solv_bs_greedy_i1 boost_program_options)
 add_executable(solv_bs_score_i1 main_template.cpp bs_score_i1.cpp ${RNG_FILE})
 target_link_libraries(solv_bs_score_i1 boost_program_options)
 
+add_executable(solv_bs_score_i2 main_template.cpp bs_score_i2.cpp ${RNG_FILE})
+target_link_libraries(solv_bs_score_i2 boost_program_options)
+
 add_executable(solv_bs_restore_i1 main_template.cpp bs_restore_i1.cpp ${RNG_FILE} ${CMAKE_SOURCE_DIR}/src/mirrors/board/cast_i1.cpp)
 target_link_libraries(solv_bs_restore_i1 boost_program_options)
+
+add_executable(solv_bs_restore_i3 main_template.cpp bs_restore_i3.cpp ${RNG_FILE} ${CMAKE_SOURCE_DIR}/src/mirrors/board/board_n_i2.cpp)
+target_link_libraries(solv_bs_restore_i3 boost_program_options)
+
 
 set(OTHERS_DIR ${CMAKE_SOURCE_DIR}/others)
 
