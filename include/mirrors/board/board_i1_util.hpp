@@ -29,7 +29,7 @@ inline Next NextFromBorder(const Position& p, board_size_t size) {
     }
 }
 
-// returns next position and from which direction ray will come to that position
+// Returns next position and from which direction ray will come to that position.
 inline Next NextFrom(const Next& current, Mirror mirror) {
     switch (mirror) {
         case Mirror::Right: {   // '\'

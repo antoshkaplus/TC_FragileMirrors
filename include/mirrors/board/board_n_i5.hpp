@@ -9,16 +9,14 @@
 #include "mirrors/common/origin_grid.hpp"
 #include "mirrors/common/cast_node.hpp"
 #include "mirrors/common/zobrist_hashing.hpp"
-#include "mirrors/board/board_n_i2_params.hpp"
+#include "mirrors/board/board_n_i5_params.hpp"
 #include "mirrors/board/board_n_i1_util.hpp"
 
 
 namespace mirrors {
 
-// From Board_n_i1. Reduce number of member variables by moving
-// board parameters out to a different structure Board_n_i2_Params.
-// Add RestoreCast method that computes board params as if the cast was made.
-class Board_n_i2 {
+// From Board_n_i2. Adds tracking number of lines with even/odd number of elements.
+class Board_n_i5 {
     static constexpr board_size_t kBorderSize = 2;
 
     using Neighbors = OriginGrid<Grid<std::array<board_size_t ,4>>>;
@@ -26,7 +24,7 @@ class Board_n_i2 {
     using CastNode_ = CastNode<Position>;
 
 public:
-    Board_n_i2(board_size_t size) :
+    Board_n_i5(board_size_t size) :
             neighbors_(Position{-1, -1},
                        size + kBorderSize),
             row_mirror_count(size, size),
@@ -48,8 +46,8 @@ public:
         }
     }
 
-    Board_n_i2_Params RestoreCast(const Position &pos,
-                                  Board_n_i2_Params res,
+    Board_n_i5_Params RestoreCast(const Position &pos,
+                                  Board_n_i5_Params res,
                                   const BoardGrid& mirs,
                                   const ZobristHashing& hashing) {
         restore.clear();
@@ -59,12 +57,23 @@ public:
             DestroyNeighbours(next.pos);
             ++res.destroyed_count_;
             hashing.xorState(&res.hash, next.pos);
-            if (--row_mirror_count[next.pos.row] == 0) {
-                ++res.empty_rows_;
-            }
-            if (--col_mirror_count[next.pos.col] == 0) {
-                ++res.empty_cols_;
-            }
+            auto new_row_count = --row_mirror_count[next.pos.row];
+
+            if (even(new_row_count)) {
+                // Empty could be considered as even,
+                // but for that empty param should probably be recomputed.
+                if (new_row_count == 0) {
+                    ++res.empty_rows_;
+                } else ++res.even_rows_;
+            } else --res.even_rows_;
+
+            auto new_col_count = --col_mirror_count[next.pos.col];
+            if (even(new_col_count)) {
+                if (new_col_count == 0) {
+                    ++res.empty_cols_;
+                } else ++res.even_cols_;
+            } else --res.even_cols_;
+
             restore.push_back(next.pos);
             // Can do that because Destroy does not touch itself neighbors_[next.pos].
             next = NextFrom(next, neighbors_[next.pos], mirs[next.pos]);

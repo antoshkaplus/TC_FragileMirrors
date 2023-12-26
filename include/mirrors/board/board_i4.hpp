@@ -4,6 +4,7 @@
 
 namespace mirrors::board {
 
+// Skips empty lines during candidate cast traversal.
 class Board_i4 : public Board_i3 {
 public:
     using Board_i3::Board_i3;

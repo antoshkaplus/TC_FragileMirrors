@@ -13,6 +13,9 @@
 
 namespace mirrors {
 
+// This representation is similar to Board_i1 in a sense how grid is used.
+// But in each cell it stores next non-destroyed mirror location above, below,
+// left and right of itself. Keep a shared pointer to a board with mirrors.
 class Board_n_i1 {
     static constexpr board_size_t kBorderSize = 2;
 

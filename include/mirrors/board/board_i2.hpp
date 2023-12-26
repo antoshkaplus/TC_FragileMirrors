@@ -4,10 +4,10 @@
 #include "mirrors/board/board_i1.hpp"
 
 
-namespace mirrors::board {
+namespace mirrors {
 
 // Adds hashing.
-class Board_i2: public Board_i1 {
+class Board_i2: public board::Board_i1 {
     using CastNode_ = CastNode<Position>;
 public:
     explicit Board_i2(const Grid<Mirror>& mirrors_param) : Board_i1(mirrors_param) {

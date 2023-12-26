@@ -9,6 +9,9 @@
 
 namespace mirrors {
 
+// Improvement on Board_i4: take Cast logic out of the Board implementation.
+// Place that logic in a separate class Cast. Also, RestoreCast allows to perform
+// a cast temporary, bringing Board to original state with the object destruction.
 class Board_i5 {
     using BoardGrid = OriginGrid<Grid<Mirror>>;
     using CastNode_ = CastNode<Position>;

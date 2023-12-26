@@ -10,6 +10,10 @@
 
 namespace mirrors::board {
 
+/*
+ * Native board representation as a grid of `mirror` cells with
+ * `border` cells on the edges and `destroyed` cells once mirror is destroyed.
+ */
 class Board_i1 {
     static constexpr board_size_t kBorderSize = 2;
 
