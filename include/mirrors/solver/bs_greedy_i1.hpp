@@ -7,6 +7,7 @@
 
 namespace mirrors::solver {
 
+// Add Beam Search to Greedy solver.
 template <class Board>
 class BS_Greedy_i1 {
 public:

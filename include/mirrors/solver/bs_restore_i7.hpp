@@ -5,15 +5,17 @@
 #include <ranges>
 #include <span>
 #include "mirrors/common/position.hpp"
+#include "mirrors/common/grid.hpp"
+#include "mirrors/common/origin_grid.hpp"
+#include "mirrors/common/zobrist_hashing.hpp"
 #include "mirrors/score/less.hpp"
-
 
 namespace mirrors {
 
-// Is made for Board_n_i2 board interface. Using `neighbour board` with Cast Restore
-// logic created a great performance increase comparing with Board_i{version} implementations.
+// Based on BS_Restore_i3. Introduce dynamic beam width:
+// beam_width = beam_width_init + beam_width_param * max( empty_lines among all boards )
 template <template<class> class Score, class Board, class BoardParams>
-class BS_Restore_i3 {
+class BS_Restore_i7 {
     using ScoreValue = Score<BoardParams>::Value;
     using BoardGrid = OriginGrid<Grid<Mirror>>;
 
@@ -34,10 +36,12 @@ class BS_Restore_i3 {
     };
 
 public:
-    explicit BS_Restore_i3(size_t beam_width,
+    explicit BS_Restore_i7(size_t beam_width_init,
+                           double beam_width_param,
                            const BoardGrid& mirrors,
                            Score<BoardParams> score = Score<BoardParams>()) :
-            beam_width(beam_width),
+            beam_width_init(beam_width_init),
+            beam_width_param(beam_width_param),
             mirrors(mirrors),
             less(score) {}
 
@@ -58,6 +62,7 @@ public:
             boards.swap(next_boards);
             visited.clear();
         }
+        throw std::runtime_error("not found");
         return {};
     }
 
@@ -73,7 +78,14 @@ public:
     }
 
     std::optional<std::vector<Position>> AddDerivativesNextBoards() {
-        auto end = derivs.begin()+std::min(derivs.size(), beam_width);
+        auto empty_lines = 0;
+        for (auto& d : derivs) {
+            empty_lines = std::max(static_cast<int>(d.params.empty_lines()),
+                                   empty_lines);
+        }
+
+        auto end = derivs.begin()+std::min(derivs.size(),
+                                           static_cast<size_t>(beam_width_init+beam_width_param*empty_lines));
         std::nth_element(derivs.begin(),
                          end-1,
                          derivs.end());
@@ -89,7 +101,8 @@ public:
     }
 
 private:
-    size_t beam_width;
+    size_t beam_width_init;
+    double beam_width_param;
     ZobristHashing hashing;
     const BoardGrid& mirrors;
     Less<Score<BoardParams>> less {};

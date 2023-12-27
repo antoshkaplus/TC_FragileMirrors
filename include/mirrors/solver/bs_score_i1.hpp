@@ -8,7 +8,7 @@
 
 namespace mirrors::solver {
 
-
+// From BS_Greedy_i1. Allows a custom score function to be used instead of pure `destroyed_count`.
 template <template<class> class Score, class Board>
 class BS_Score_i1 {
 public:

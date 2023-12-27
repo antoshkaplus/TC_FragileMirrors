@@ -12,6 +12,10 @@
 
 namespace mirrors {
 
+// Based on BS_Restore_i1. Instead of adding straight to next level boards,
+// we create a big set of all candidates and then pick the most prominent ones,
+// Create next_boards set with them.
+// Did not see performance benefits.
 template <template<class> class Score>
 class BS_Restore_i2 {
     using Board = Board_i5;

@@ -12,6 +12,10 @@
 
 namespace mirrors {
 
+// From BS_Score_i1. Add AddNextBoardsRestore - use temporal cast on a board
+// when selecting best boards. So that we don't copy before each cast but do that
+// only when want to add to best boards set.
+// This does not help with performance at any level of the beam search.
 template <template<class> class Score>
 class BS_Restore_i1 {
     using Board = Board_i5;

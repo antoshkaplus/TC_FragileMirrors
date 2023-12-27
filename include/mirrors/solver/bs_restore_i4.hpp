@@ -10,10 +10,11 @@
 
 namespace mirrors {
 
-// Is made for Board_n_i2 board interface. Using `neighbour board` with Cast Restore
-// logic created a great performance increase comparing with Board_i{version} implementations.
+// Based on BS_Restore_i3. Before computing derivatives of a board, check if it has an isolated cell:
+// Immediately destroy it and promote to the next level.
+// Did not improve score.
 template <template<class> class Score, class Board, class BoardParams>
-class BS_Restore_i3 {
+class BS_Restore_i4 {
     using ScoreValue = Score<BoardParams>::Value;
     using BoardGrid = OriginGrid<Grid<Mirror>>;
 
@@ -34,7 +35,7 @@ class BS_Restore_i3 {
     };
 
 public:
-    explicit BS_Restore_i3(size_t beam_width,
+    explicit BS_Restore_i4(size_t beam_width,
                            const BoardGrid& mirrors,
                            Score<BoardParams> score = Score<BoardParams>()) :
             beam_width(beam_width),
@@ -44,7 +45,7 @@ public:
     std::vector<Position> Destroy() {
         int size = mirrors.grid().size()-2;
         hashing = ZobristHashing(size);
-        boards.emplace_back(Board(size), BoardParams{size});
+        boards.emplace_back(Board(size), BoardParams{});
         for (auto i = 0; i < size*size; ++i) {
             for (auto& item: boards) {
                 AddBoardDerivatives(item);
@@ -62,6 +63,18 @@ public:
     }
 
     void AddBoardDerivatives(BoardItem& item) {
+        auto& b = item.board;
+        for (board_size_t i = 0; i < b.size(); ++i) {
+            if (b.single_row_mirror(i)) {
+                Position p{i, -1};
+                auto next = b.NextFromBorder(p);
+                if (b.single_col_mirror(next.col)) {
+                    b.DestroyIsolated(next, item.params, hashing);
+                    next_boards.emplace_back(std::move(item));
+                    return;
+                }
+            }
+        }
         item.board.ForEachCastCandidate([&](const Position& p) {
             auto new_params = item.board.RestoreCast(
                     p, item.params, mirrors, hashing);

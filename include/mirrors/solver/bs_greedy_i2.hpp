@@ -8,7 +8,8 @@
 
 namespace mirrors {
 
-// Traverse boards from best to worse. Should reduce number of inserts.
+// From BS_Greedy_i1. Traverse boards in reverse order: candidates of better boards
+// get to be processed first. Expect reduced number of inserts.
 template <class Board>
 class BS_Greedy_i2 {
 public:

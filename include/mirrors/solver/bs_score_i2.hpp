@@ -9,7 +9,7 @@
 
 namespace mirrors::solver {
 
-
+// From BS_Score_i1. Use priority_queue instead of multimap to store boards between levels.
 template <template<class> class Score, class Board>
 class BS_Score_i2 {
 public:

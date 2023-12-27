@@ -1,10 +1,11 @@
 #pragma once
 #include <vector>
-#include "board/board_i1.hpp"
+#include "mirrors/board/board_i1.hpp"
 
 
 namespace mirrors::solver {
 
+// Greedy solver: each level take board with most destroyed mirrors.
 struct Greedy_i1 {
     std::vector<Position> Destroy(const board::Board_i1& b) {
         std::vector<Position> cast_history;
