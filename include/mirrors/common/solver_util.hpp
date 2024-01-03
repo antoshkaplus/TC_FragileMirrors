@@ -44,6 +44,21 @@ inline Grid<Mirror> ToMirrorsGrid(const std::vector<std::string>& board) {
     return res;
 }
 
+inline Grid<mir_t> ToMirGrid(const std::vector<std::string>& board) {
+    std::function<mir_t(char)> convert = ConvertLetterMirrorToMir;
+    auto any = board[0][0];
+    if (any == '\\' || any == '/') {
+        convert = ConvertChMirrorToMir;
+    }
+    Grid<mir_t> res(board.size());
+    for (auto row = 0; row < board.size(); ++row) {
+        for (auto col = 0; col < board.size(); ++col) {
+            res(row, col) = convert(board[row][col]);
+        }
+    }
+    return res;
+}
+
 inline std::vector<int> ToSolution(const std::vector<Position>& ps) {
     std::vector<int> res;
     res.reserve(2*ps.size());
