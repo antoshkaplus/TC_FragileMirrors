@@ -19,6 +19,9 @@ namespace mirrors {
 // board parameters out to a different structure Board_n_i2_Params.
 // Add RestoreCast method that computes board params as if the cast was made.
 class Board_n_i2 {
+public:
+    using CastValue = Position;
+private:
     static constexpr board_size_t kBorderSize = 2;
 
     using Neighbors = OriginGrid<Grid<std::array<board_size_t ,4>>>;
