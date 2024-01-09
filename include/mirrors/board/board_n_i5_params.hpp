@@ -40,6 +40,9 @@ struct Board_n_i5_Params {
     board_size_t even_cols() const {
         return even_cols_;
     }
+    cell_count_t  empty_lines() const {
+        return empty_rows_ + empty_cols_;
+    }
 
     template<class Board>
     bool board_empty(const Board& b) const {

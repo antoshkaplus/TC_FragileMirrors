@@ -26,6 +26,8 @@ class Board_n_i4 {
     using BorderConnCounts = std::array<cell_count_t, 5>;
     using BoardConnCounts = Grid<board_size_t>;
 public:
+    using CastValue = Position;
+
     Board_n_i4(board_size_t size) :
             neighbors_(Position{-1, -1},
                        size + kBorderSize),
@@ -48,7 +50,7 @@ public:
         }
     }
 
-    Board_n_i4_Params RestoreCast( const Position &pos,
+    Board_n_i4_Params RestoreCast(const Position &pos,
                       Board_n_i4_Params params,
                       const BoardGrid& mirs,
                       const ZobristHashing& hashing) {

@@ -24,6 +24,8 @@ class Board_n_i5 {
     using CastNode_ = CastNode<Position>;
 
 public:
+    using CastValue = Position;
+
     Board_n_i5(board_size_t size) :
             neighbors_(Position{-1, -1},
                        size + kBorderSize),
@@ -57,8 +59,8 @@ public:
             DestroyNeighbours(next.pos);
             ++res.destroyed_count_;
             hashing.xorState(&res.hash, next.pos);
-            auto new_row_count = --row_mirror_count[next.pos.row];
 
+            auto new_row_count = --row_mirror_count[next.pos.row];
             if (even(new_row_count)) {
                 // Empty could be considered as even,
                 // but for that empty param should probably be recomputed.
