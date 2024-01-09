@@ -7,7 +7,7 @@
 
 #include "beam_search.hpp"
 #include "board_v6.hpp"
-#include "score.hpp"
+#include "_score.hpp"
 
 
 template<class Board, class Solver>

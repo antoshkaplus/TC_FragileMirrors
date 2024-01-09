@@ -8,7 +8,7 @@
 
 #include <random>
 
-#include "util.hpp"
+#include "_util.hpp"
 
 #ifdef RNG
 

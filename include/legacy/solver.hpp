@@ -221,22 +221,6 @@ private:
 */
 
 
-template<class PointArray, class Point, class Distance>
-std::vector<Index> FindNearestNeighbors(const PointArray& point_array, 
-                                        const Point& point, 
-                                        Count k, 
-                                        const Distance& distance) {
-    std::vector<Index> inds(point_array.size());
-    std::iota(inds.begin(), inds.end(), 0);
-    // can be greater than number of inds
-    Count valid_k = std::min(k, (Count)inds.size());
-    std::nth_element(inds.begin(), inds.begin()+valid_k, inds.end(), [&](Index i_0, Index i_1) {
-        return distance(i_0, i_1);
-    });
-    inds.resize(valid_k);
-    return inds;
-}
-
 struct MultiDerivative {
     MultiDerivative(shared_ptr<Board> board, Position cast)
     : board(board), casts({cast}) {}

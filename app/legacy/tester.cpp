@@ -2,9 +2,9 @@
 /// 
 
 
-#include "util.hpp"
-#include "score.hpp"
-#include "board_v1_impl_1.hpp"
+#include "_util.hpp"
+#include "_score.hpp"
+#include "_board_v1_impl_1.hpp"
 #include "naive_search.hpp"
 #include "nested_monte_carlo_search.hpp"
 #include "board_v6.hpp"
@@ -12,10 +12,10 @@
 #include "board_v2_impl_1.hpp"
 #include "beam_search.hpp"
 #include "bs_balanced.hpp"
-#include "beam_search_history.hpp"
+#include "_beam_search_history.hpp"
 #include "bs_new.hpp"
 #include "dfs.hpp"
-#include "stats.hpp"
+#include "_stats.hpp"
 
 using B_1 = Board_v1_Impl_1<CastHistory_Nodes>;
 

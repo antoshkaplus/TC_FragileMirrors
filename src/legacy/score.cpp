@@ -8,7 +8,7 @@
 
 #include <array>
 
-#include "score.hpp"
+#include "_score.hpp"
 
 using namespace std;
 
@@ -19,7 +19,7 @@ const array<double, 51> EMPTY_LINES_PARAM = { {
     8.33269,
     10.4997,
     7.4959,
-    7.9984,
+    7.9984, // 55
     7.9984,
     11.333,
     7.9984,
@@ -29,7 +29,7 @@ const array<double, 51> EMPTY_LINES_PARAM = { {
     11.9981,
     13.3318,
     10.6623,
-    7.33329,
+    7.33329, // 65
     10.9966,
     14.9963,
     9.5003,

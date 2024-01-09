@@ -1,5 +1,5 @@
-#include "util.hpp"
-#include "score.hpp"
+#include "_util.hpp"
+#include "_score.hpp"
 #include "board_v6.hpp"
 #include "bs_balanced.hpp"
 #include "fragile_mirrors.hpp"

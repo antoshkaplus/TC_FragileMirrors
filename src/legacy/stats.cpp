@@ -8,7 +8,7 @@
 
 #include <stdio.h>
 
-#include "stats.hpp"
+#include "_stats.hpp"
 
 // coeff for each cast to get global score
 vector<double> ReadDestroyedCoeffs(istream& in) {

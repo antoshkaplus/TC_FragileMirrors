@@ -1,14 +1,16 @@
-#include "util.hpp"
-#include "score.hpp"
+#include "_util.hpp"
+#include "_score.hpp"
+
 #include "board_v6.hpp"
-#include "beam_search.hpp"
+#include "bs_new.hpp"
 #include "fragile_mirrors.hpp"
 
 
+BeamSearchNew<Board_v6> solver;
+
 std::vector<int> FragileMirrors::destroy(const std::vector<std::string> & board) {
-    BeamSearch<Board_v6, Score_v1> solver;
-    solver.set_time(std::chrono::seconds(100));
-    solver.set_beam_width(500.*pow(100./board.size(), 2));
+    solver.set_millis(10000);
+    solver.set_beam_width(50 + 100 - board.size());
     auto w = solver.Destroy(board);
     return ToSolution(w.CastHistory());
 }

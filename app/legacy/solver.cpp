@@ -5,10 +5,10 @@
 /// -m : mehtod. for now just NaiveSearch
 /// -s : score function probably
 
-#include "util.hpp"
-#include "score.hpp"
+#include "_util.hpp"
+#include "_score.hpp"
 
-#include "board_v1_impl_1.hpp"
+#include "_board_v1_impl_1.hpp"
 #include "board_v6.hpp"
 
 #include "bs_new.hpp"
