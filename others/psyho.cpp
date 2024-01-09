@@ -19,6 +19,7 @@ double TL_SCALE[TL_NO];
 #define MAX_BEAM_CHANGE_2 0.09
 #define MAX_BEAM_CHANGE_3 0.18
 
+// Anton: Uncomment to see progress.
 //#define VERBOSE
 
 #ifdef LOCAL
@@ -832,5 +833,6 @@ VI FragileMirrors::destroy(const VS& board) {
         if (i) cerr << ", ";
         cerr << times[i] << ":" << beams[i];
     }
+    cerr << endl;
     return rv;
 }

@@ -8,7 +8,7 @@
 
 #include <array>
 
-#include "_score.hpp"
+#include "legacy/score.hpp"
 
 using namespace std;
 
