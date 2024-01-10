@@ -17,4 +17,12 @@ TopCoder marathon match problem.
 * I was not able to capitalize on `even_lines`. When scoring, > 1 values of the param were not leading to convergence
     for some reason. Could be because empty casts were allowed. After that was afraid to use something higher than 0.5.
     Psyho scoring function showed that flow.
-    
+
+### Scores:
+
+* chokudai_1000 : 1.1177
+* psyho_1000 : 1.0942
+* solv_3_1000_psyho2 : 1.082 // my algo psyho scoring with even_lines
+* solv_2_1000 : 1.0685 // empty_lines 30 or 40
+* solv_2_1000_psyho : 1.0677 // my algo psyho scoring with empty_lines
+* solv_1_1000 : 1.042
