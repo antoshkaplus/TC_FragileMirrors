@@ -15,13 +15,14 @@ namespace mirrors {
 template <template<class> class Score, class Board, class BoardParams>
 class BS_Restore_i3 {
     using ScoreValue = Score<BoardParams>::Value;
+    using CastValue = Board::CastValue;
     using BoardGrid = OriginGrid<Grid<Mirror>>;
 
     struct Derivative {
         BoardParams params;
         const Board* board;
         ScoreValue score;
-        Position cast;
+        CastValue cast;
 
         bool operator<(const Derivative& other) const {
             return score > other.score;
@@ -62,7 +63,7 @@ public:
     }
 
     void AddBoardDerivatives(BoardItem& item) {
-        item.board.ForEachCastCandidate([&](const Position& p) {
+        item.board.ForEachCastCandidate([&](const auto& p) {
             auto new_params = item.board.RestoreCast(
                     p, item.params, mirrors, hashing);
             if (!visited.insert(new_params.hash).second) {
