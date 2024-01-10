@@ -93,6 +93,4 @@ std::vector<int> FragileMirrors::destroy(const std::vector<std::string>& board) 
             auto msg = boost::format("Unexpected board version %1%") % params.board_version;
             throw std::runtime_error(msg.str());
     }
-
-    //return ::destroy< mirrors::solver::BS_Score_i1, >(params, bb);
 }

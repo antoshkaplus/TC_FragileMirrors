@@ -5,14 +5,9 @@
 #include "mirrors/solver/bs_restore_i5.hpp"
 #include "mirrors/solver/bs_restore_i6.hpp"
 #include "mirrors/common/solver_util.hpp"
-#include "mirrors/score/score_i1.hpp"
-#include "mirrors/score/score_i2.hpp"
-#include "mirrors/score/score_i3.hpp"
 #include "mirrors/score/score_i4.hpp"
-#include "mirrors/score/score_i5.hpp"
-#include "mirrors/score/score_i6.hpp"
-#include "mirrors/score/empty_lines_param.hpp"
-#include "legacy/score.hpp"
+#include "mirrors/param/empty_lines_param.hpp"
+#include "legacy/score_.hpp"
 #include "fragile_mirrors.hpp"
 
 

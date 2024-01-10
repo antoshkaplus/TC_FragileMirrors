@@ -42,8 +42,8 @@ Params parse_beam_width(const std::vector<std::string>& cmd_args) {
 template<template<class> class Solver>
 std::vector<int> destroy(const Params& params, const mirrors::Grid<mirrors::Mirror>& gg) {
     if (params.board_version == "2") {
-        mirrors::board::Board_i2 bb(gg);
-        Solver<mirrors::board::Board_i2> solver(params.beam_width);
+        mirrors::Board_i2 bb(gg);
+        Solver<mirrors::Board_i2> solver(params.beam_width);
         auto cast_history = solver.Destroy(bb);
         return mirrors::ToSolution(cast_history);
     }

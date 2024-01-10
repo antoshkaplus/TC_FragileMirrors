@@ -3,7 +3,6 @@
 #include "mirrors/board/board_r6.hpp"
 #include "mirrors/solver/bs_restore_i7.hpp"
 #include "mirrors/solver/solver_1.hpp"
-#include "mirrors/solver/solver_2.hpp"
 #include "mirrors/solver/bs_restore_i7_beam_width.hpp"
 #include "mirrors/common/solver_util.hpp"
 #include "mirrors/score/score_i1.hpp"
@@ -12,7 +11,7 @@
 #include "mirrors/score/score_i6.hpp"
 #include "mirrors/param/empty_lines_param.hpp"
 #include "mirrors/param/beam_width.hpp"
-#include "legacy/score.hpp"
+#include "legacy/score_.hpp"
 #include "fragile_mirrors.hpp"
 
 
@@ -42,6 +41,8 @@ struct BeamWidthOptions {
 
         if (beam_width == "10sec") {
             params.beam_width = mirrors::_10_SEC_FIXED_WIDTH[board_size-50];
+        } else if (beam_width =="10sec2") {
+            params.beam_width = mirrors::_10_SEC_FIXED_WIDTH_2[board_size-50];
         } else {
             params.beam_width = std::stoul(beam_width);
         }
@@ -72,7 +73,7 @@ Params parse_params(const std::vector<std::string>& cmd_args, mirrors::board_siz
     desc.add_options()
             ("solver-version", po::value(&params.solver_version)->default_value(1))
             ("score", po::value<size_t>(&params.score_version)->default_value(4))
-            ("score-param", po::value<std::string>(&score_param))
+            ("score-param", po::value<std::string>(&score_param)->default_value("empty-lines"))
             ("board", po::value(&params.board_version));
     BeamWidthOptions bw_options(desc, params);
     po::variables_map vm;
@@ -84,16 +85,17 @@ Params parse_params(const std::vector<std::string>& cmd_args, mirrors::board_siz
     bw_options.parse(board_size);
     std::cerr << "score version: " << params.score_version << '\n';
     const auto kMinBoardSize = 50;
-    if (vm.contains("score-param")) {
-        if (score_param == "legacy") {
-            params.score_param = legacy::EMPTY_LINES_PARAM[board_size-kMinBoardSize];
-        } else {
-            params.score_param = std::stod(score_param);
-        }
-    } else {
+    if (score_param == "legacy") {
+        params.score_param = legacy::EMPTY_LINES_PARAM[board_size-kMinBoardSize];
+    } else if (score_param == "empty-lines") {
         params.score_param = mirrors::EMPTY_LINES_PARAM[board_size-kMinBoardSize];
+    } else if (score_param == "empty-lines-10") {
+        params.score_param = mirrors::EMPTY_LINES_PARAM_10[board_size-kMinBoardSize];
+    } else {
+        params.score_param = std::stod(score_param);
     }
     std::cerr << "score param: " << params.score_param << '\n';
+
     if (vm.contains("board")) {
         std::cerr << "board version: " << params.board_version << '\n';
     }
@@ -155,7 +157,6 @@ std::vector<int> FragileMirrors::destroy(const std::vector<std::string>& board) 
     auto gg = mirrors::ToMirGrid(board);
     switch (params.solver_version) {
         case 1: return mirrors::destroy<mirrors::Solver_1, mirrors::Board_r6>(params, gg);
-        case 2: return mirrors::destroy<mirrors::Solver_2, mirrors::Board_r6>(params, gg);
         default:
             auto msg = boost::format("Unexpected solver version: %1%") % params.solver_version;
             throw std::runtime_error(msg.str());

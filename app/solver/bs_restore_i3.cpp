@@ -16,7 +16,7 @@
 #include "mirrors/score/score_i6.hpp"
 #include "mirrors/param/beam_width.hpp"
 #include "mirrors/param/empty_lines_param.hpp"
-#include "legacy/score.hpp"
+#include "legacy/score_.hpp"
 #include "fragile_mirrors.hpp"
 
 
