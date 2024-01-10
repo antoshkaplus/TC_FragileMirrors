@@ -9,6 +9,7 @@ namespace mirrors {
 
 using board_size_t = int8_t;
 using cell_count_t = int16_t;
+using deriv_count_t = int32_t;
 using hash_value_t = uint64_t;
 using dir_t = int8_t;
 using mir_t = int8_t;
