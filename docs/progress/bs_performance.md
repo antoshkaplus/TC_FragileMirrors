@@ -94,9 +94,3 @@ Using profiling we found the following improvements:
   with `void ForEachCastCandidate(auto func) const` to allow inlining. Otherwise, function object creation is forced.
 Implementation of both improvements in Board_r6 with Solver_1 perf: ~ 455.01 sec.
 
-  
-[//]: # (#### Eliminate Hash Table, Use Order By Hash Instead.)
-[//]: # ()
-[//]: # (The final change is removing hash table to dismiss duplicate boards from next level candidates.)
-[//]: # (Instead, we pick the best candidates and sort by score and hash, promote to next level skipping duplicate hashes.)
-[//]: # (Board_r6 and Solver_2 perf: )
