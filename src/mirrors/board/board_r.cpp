@@ -4,6 +4,7 @@
 #include "mirrors/board/board_r4.hpp"
 #include "mirrors/board/board_r5.hpp"
 #include "mirrors/board/board_r6.hpp"
+#include "mirrors/board/board_r7.hpp"
 
 
 std::vector<mirrors::cell_count_t> mirrors::Board_r::restore;
@@ -25,3 +26,8 @@ uint32_t mirrors::Board_r6::destroyed_idx = 0;
 mirrors::Grid<uint32_t> mirrors::Board_r6::destroyed;
 std::vector<mirrors::Position> mirrors::Board_r6::destroyed_pos;
 std::vector<mirrors::cell_count_t> mirrors::Board_r6::destroyed_cast;
+
+uint32_t mirrors::Board_r7::destroyed_idx = 0;
+mirrors::Grid<uint32_t> mirrors::Board_r7::destroyed;
+std::vector<mirrors::Position> mirrors::Board_r7::destroyed_pos;
+std::vector<mirrors::cell_count_t> mirrors::Board_r7::destroyed_cast;
