@@ -24,7 +24,10 @@ Scoring function for each state :
    + even rows/columns * WP
    + rows/columns with 1 left mirror * W1
    + rows/columns with 2 mirrors * W2
-   + rows/columns with 4 mirrors * W4) / N / 16.
+   + rows/columns with 4 mirrors * W4) * N / 16.
+
+Note: Anton replaced `/ N / 16` with `* N / 16`. Obvious typo. 
+  Scoring function finally started to work after the change
 
 W0 = 8, W1 = 1, W2 = 2, W4 = 1, WP = 3 for even N, 7 for odd N.
 
