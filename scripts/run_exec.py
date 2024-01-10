@@ -17,10 +17,10 @@ output_name = temp_dir + "output.txt"
 
 input = open(input_name, "w")
 
-n = int(raw_input())
+n = int(input())
 input.write(str(n) + "\n");
 for i in range(n):
-    s = raw_input()
+    s = input()
     input.write(s + "\n")
 
 input.close()
@@ -31,6 +31,6 @@ os.system(executable + " -i " + input_name + " -o " + output_name)
 
 output = open(output_name, "r")
 s = output.read()
-print s
+print(s)
 sys.stdout.flush()
 output.close()

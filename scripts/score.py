@@ -44,6 +44,9 @@ class Timer:
 
 
 pool = Pool(CPU_COUNT)
+# TODO: Starting a separate process,
+#  running java program from it that calls c++ solver can take quite some time.
+#  Should compute performance inside the solver.
 with Timer():
     # Do not use zero seed - messes up random generator of the runner.
     result = pool.map(worker, (i for i in range(1, TEST_COUNT+1)))
